@@ -6,11 +6,11 @@ import "../install.css";
 
 export function QuickStartPopover() {
   return (
-    <Popover.Root>
+    <Popover>
       <Popover.Trigger asChild>
         <Button 
           variant="solid" 
-          tone="primary" 
+          color="primary" 
           size="lg"
           iconOnly
           className="quick-start-orb"
@@ -56,6 +56,6 @@ export function QuickStartPopover() {
           </div>
         </div>
       </Popover.Content>
-    </Popover.Root>
+    </Popover>
   );
 }
