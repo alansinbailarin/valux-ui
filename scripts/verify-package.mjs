@@ -29,13 +29,14 @@ function assert(condition, message) {
 }
 
 function getPackedFiles() {
-  const output = execFileSync("pnpm", ["pack", "--dry-run", "--json"], {
+  const output = execFileSync("npm", ["pack", "--dry-run", "--json"], {
     encoding: "utf8",
   });
   const packResult = JSON.parse(output);
 
-  assert(Array.isArray(packResult.files), "pnpm pack returned no file list");
-  return new Set(packResult.files.map(({ path }) => path));
+  const files = Array.isArray(packResult) ? packResult[0].files : packResult.files;
+  assert(Array.isArray(files), "pack returned no file list");
+  return new Set(files.map(({ path }) => path));
 }
 
 function getCssImports(css) {
