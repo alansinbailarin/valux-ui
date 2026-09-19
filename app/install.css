@@ -42,3 +42,15 @@
 [data-vx-mode="dark"] .tok-keyword { color: oklch(0.7 0.15 280); }
 [data-vx-mode="dark"] .tok-string { color: oklch(0.7 0.15 140); }
 [data-vx-mode="dark"] .tok-tag { color: oklch(0.7 0.15 20); }
+
+.quick-start-orb {
+  position: fixed;
+  left: clamp(1rem, 4vw, 2rem);
+  bottom: clamp(1rem, 4vw, 2rem);
+  z-index: 1300;
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 15%);
+}
+[data-vx-mode="dark"] .quick-start-orb {
+  box-shadow: 0 4px 20px rgb(0 0 0 / 40%);
+}
