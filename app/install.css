@@ -1,0 +1,44 @@
+.install-section {
+  max-width: 50rem;
+  margin: 0 auto 4rem auto;
+  padding: 0 clamp(1rem, 3vw, 2.25rem);
+}
+
+.install-header {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
+  color: var(--vx-color-surface-ink);
+}
+
+.install-desc {
+  font-size: 1rem;
+  color: var(--vx-color-surface-dim);
+  margin-bottom: 1.5rem;
+}
+
+.install-block {
+  background: var(--vx-color-scrim-lower);
+  border-radius: var(--vx-radius-md);
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--vx-color-surface-ink);
+}
+
+.install-block code {
+  white-space: pre-wrap;
+}
+
+.tok-keyword { color: oklch(0.6 0.15 280); }
+.tok-string { color: oklch(0.6 0.15 140); }
+.tok-tag { color: oklch(0.6 0.15 20); }
+.tok-comment { color: var(--vx-color-surface-dim); font-style: italic; }
+
+[data-vx-mode="dark"] .tok-keyword { color: oklch(0.7 0.15 280); }
+[data-vx-mode="dark"] .tok-string { color: oklch(0.7 0.15 140); }
+[data-vx-mode="dark"] .tok-tag { color: oklch(0.7 0.15 20); }
