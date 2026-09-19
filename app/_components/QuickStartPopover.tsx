@@ -2,7 +2,7 @@
 
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { Popover, Button } from "@/src";
-import "../install.css";
+
 
 export function QuickStartPopover() {
   return (

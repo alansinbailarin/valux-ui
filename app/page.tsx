@@ -4,7 +4,7 @@ import "./cylinder.css";
 import "./flow.css";
 import "./mosaic.css";
 import "./expand.css";
-import "./install.css";
+
 
 import { Mosaic } from "./_components/Mosaic";
 import { Toaster } from "@/src";
