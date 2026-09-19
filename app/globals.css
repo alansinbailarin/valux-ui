@@ -58,7 +58,7 @@ body {
     color-mix(in srgb, var(--vx-color-on-surface) 5%, var(--vx-color-surface-base)),
     color-mix(in srgb, var(--vx-color-on-surface) 8%, var(--vx-color-surface-base))
   );
-  border-radius: var(--vx-radius-md);
+  border-radius: var(--vx-radius-control);
   padding: 1.25rem;
   margin-bottom: 2rem;
   overflow-x: auto;
@@ -83,8 +83,8 @@ body {
 
 .quick-start-orb {
   position: fixed;
-  right: calc(clamp(1rem, 4vw, 2rem) + 2.5rem);
-  bottom: clamp(0.775rem, calc(4vw - 0.225rem), 1.775rem);
+  right: 4.5rem;
+  bottom: 1.5rem;
   width: 2.25rem !important;
   height: 2.25rem !important;
   z-index: 1300;

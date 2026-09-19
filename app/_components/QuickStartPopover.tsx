@@ -11,13 +11,13 @@ export function QuickStartPopover() {
         <Button 
           variant="solid" 
           color="primary" 
-          size="md"
+          
           iconOnly
           className="quick-start-orb"
-          style={{ position: "fixed", right: "clamp(3.5rem, 8vw, 4.5rem)", bottom: "clamp(1rem, 4vw, 2rem)", zIndex: 1300, borderRadius: "50%", width: "3rem", height: "3rem" }}
+          style={{ position: "fixed", right: "calc(clamp(1rem, 4vw, 2rem) + 2.5rem)", bottom: "clamp(1rem, 4vw, 2rem)", zIndex: 1300, borderRadius: "50%", width: "1.8rem", height: "1.8rem", padding: 0, minWidth: "0", minHeight: "0", display: "flex", alignItems: "center", justifyContent: "center" }}
           aria-label="Quick Start Guide"
         >
-          <DocumentTextIcon />
+          <DocumentTextIcon style={{ width: "1.1rem", height: "1.1rem" }} />
         </Button>
       </Popover.Trigger>
       
@@ -28,7 +28,7 @@ export function QuickStartPopover() {
       >
         <div className="install-section" style={{ margin: 0, padding: 0, maxWidth: "none" }}>
           <h2 className="install-header" style={{ marginTop: 0 }}>Quick Start</h2>
-          <p className="install-desc">Install the library via your package manager.</p>
+          <p className="install-desc">Install the library via your package manager. <a href="https://www.npmjs.com/package/valux-ui" target="_blank" rel="noreferrer" style={{color: "var(--vx-color-primary)", textDecoration: "underline"}}>View on npm</a></p>
           
           <div className="install-block" style={{ marginBottom: "1.5rem" }}>
             <code>npm install valux-ui</code>
@@ -40,7 +40,7 @@ export function QuickStartPopover() {
           <div className="install-block" style={{ marginBottom: 0 }}>
             <code>
               <span className="tok-keyword">import</span> {"{"} ValuxProvider {"}"} <span className="tok-keyword">from</span> <span className="tok-string">"valux-ui"</span>;<br />
-              <span className="tok-keyword">import</span> <span className="tok-string">"valux-ui/dist/styles.css"</span>;<br />
+              <span className="tok-keyword">import</span> <span className="tok-string">"valux-ui/styles.css"</span>;<br />
               <br />
               <span className="tok-keyword">export default function</span> RootLayout({"{"} children {"}"}: {"{"} children: React.ReactNode {"}"}) {"{"}<br />
               &nbsp;&nbsp;<span className="tok-keyword">return</span> (<br />
