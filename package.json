@@ -61,9 +61,9 @@
     "package:contract": "node scripts/verify-package.mjs",
     "verify:conditions": "node scripts/verify-conditions.mjs",
     "audit:contrast": "node scripts/audit-contrast.mjs",
-    "pack:check": "pnpm pack --dry-run",
-    "verify": "pnpm lint && pnpm typecheck && pnpm test && pnpm build && pnpm package:contract && pnpm verify:conditions && pnpm publint && pnpm pack:check",
-    "prepublishOnly": "pnpm verify",
+    "pack:check": "npm pack --dry-run",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build && npm run package:contract && npm run verify:conditions && npx publint && npm run pack:check",
+    "prepublishOnly": "npm run verify",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui",
     "docs:llms": "node scripts/build-llms.mjs"
