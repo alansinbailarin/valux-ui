@@ -11,9 +11,10 @@ export function QuickStartPopover() {
         <Button 
           variant="solid" 
           color="primary" 
-          size="lg"
+          size="md"
           iconOnly
           className="quick-start-orb"
+          style={{ position: "fixed", right: "clamp(3.5rem, 8vw, 4.5rem)", bottom: "clamp(1rem, 4vw, 2rem)", zIndex: 1300, borderRadius: "50%", width: "3rem", height: "3rem" }}
           aria-label="Quick Start Guide"
         >
           <DocumentTextIcon />
