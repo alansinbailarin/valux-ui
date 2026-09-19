@@ -1,0 +1,119 @@
+/* Card anatomy parts. Every part is optional; spacing comes from the
+   card tokens so density theming stays centralized. */
+.vx-card__media {
+  position: relative;
+  overflow: hidden;
+}
+
+.vx-card__media-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vx-card__media-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: var(--vx-card-padding);
+}
+
+.vx-card__header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding: var(--vx-card-padding) var(--vx-card-padding) 0;
+}
+
+.vx-card__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  /* Headings keep 600; the control token dropped to 500 for buttons. */
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.vx-card__subtitle {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--vx-color-on-surface) 62%, transparent);
+}
+
+.vx-card__body {
+  padding: var(--vx-card-gap) var(--vx-card-padding);
+  font-size: var(--vx-font-size-control);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.vx-card__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--vx-control-gap);
+  padding: var(--vx-card-gap) var(--vx-card-padding) var(--vx-card-padding);
+}
+
+/* Hairline between sections. Inset-aware: inset="content" pulls it in to
+   the content edge (the iOS grouped-list separator), inset="none" bleeds to
+   the card edge. Same edge color as the outline variant's border. */
+.vx-card__separator {
+  flex: none;
+  height: 1px;
+  margin: 0 var(--vx-card-separator-inset);
+  border: 0;
+  background: color-mix(
+    in srgb,
+    var(--vx-color-on-surface) var(--vx-card-border-alpha),
+    transparent
+  );
+}
+
+.vx-card__separator[data-vx-inset="content"] {
+  --vx-card-separator-inset: var(--vx-card-padding);
+}
+
+/* Per-section plane: a header or footer can sit one step off the card's own
+   surface (grouped-settings look). A translucent wash of on-surface rather
+   than a fixed color, so it reads correctly on every variant and in both
+   modes without needing a fourth rung on the ladder. */
+.vx-card__header[data-vx-surface="subtle"],
+.vx-card__body[data-vx-surface="subtle"],
+.vx-card__footer[data-vx-surface="subtle"] {
+  background: color-mix(
+    in srgb,
+    var(--vx-color-on-surface) var(--vx-card-subtle-alpha),
+    transparent
+  );
+}
+
+/* padding="none" per part: zero the tokens, not the property, so the
+   first/last-child rules below resolve to 0 as well (they read the same
+   token) and nothing depends on selector-specificity luck. */
+.vx-card__header[data-vx-padding="none"],
+.vx-card__body[data-vx-padding="none"],
+.vx-card__footer[data-vx-padding="none"] {
+  --vx-card-padding: 0px;
+  --vx-card-gap: 0px;
+}
+
+/* First/last part adjustments: media touches the card edges; a body or
+   header directly after media regains its top padding. */
+.vx-card > .vx-card__body:first-child {
+  padding-top: var(--vx-card-padding);
+}
+.vx-card > .vx-card__media + .vx-card__body {
+  padding-top: var(--vx-card-padding);
+}
+.vx-card > .vx-card__body:last-child {
+  padding-bottom: var(--vx-card-padding);
+}
+.vx-card > .vx-card__header:last-child {
+  padding-bottom: var(--vx-card-padding);
+}
+.vx-card > .vx-card__footer:first-child {
+  padding-top: var(--vx-card-padding);
+}

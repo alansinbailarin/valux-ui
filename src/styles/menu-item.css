@@ -1,0 +1,168 @@
+[data-vx-menu-item] {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: var(--vx-menu-item-gap);
+  border: none;
+  border-radius: var(--vx-menu-item-radius);
+  padding: var(--vx-menu-item-padding);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  font-size: var(--vx-font-size-control);
+  /* 500, not 530: fractional weights snap UP to the next static weight
+     (Poppins 400/500/600/700 → 530 rendered as 600, reading as bold). */
+  font-weight: 500;
+  opacity: 0;
+  transform: translate(-6px, 6px);
+  transition:
+    opacity 0.38s ease,
+    transform 0.62s cubic-bezier(0.22, 1.5, 0.36, 1),
+    background-color 0.22s ease;
+}
+
+[data-vx-menu][data-vx-phase="open"] [data-vx-menu-item],
+[data-vx-menu][data-vx-phase="opening"] [data-vx-menu-item] {
+  opacity: 1;
+  transform: none;
+}
+
+[data-vx-menu-item] {
+  transition: background-color 0.25s ease;
+}
+
+[data-vx-menu-item]:hover:not(:disabled) {
+  background: var(--vx-menu-item-hover);
+}
+
+[data-vx-menu-item]:focus-visible {
+  outline: none;
+  background: var(--vx-menu-item-hover);
+  box-shadow: inset 0 0 0 var(--vx-focus-width) var(--vx-color-focus);
+}
+
+[data-vx-menu-item]:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+[data-vx-menu-item][data-vx-destructive] {
+  color: var(--vx-color-danger-foreground);
+}
+
+[data-vx-menu-item][data-vx-destructive]:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--vx-color-danger), transparent 93%);
+}
+
+/* On close the content leaves toward the origin, drawn up-left into the
+   trigger the panel is about to become. Label and separator leave on the same
+   beat as the items: the closing panel is the trigger coming home, and the
+   ghost "…" fading up inside it has to land on an empty body — anything still
+   aboard rides the collapse down and prints on top of the icon as a speck.
+   The panel's top-left transform-origin makes the label the worst offender:
+   it barely travels, so it stays legible the whole way. */
+[data-vx-menu][data-vx-phase="closing"] [data-vx-menu-item],
+[data-vx-menu][data-vx-phase="closing"] [data-vx-menu-label],
+[data-vx-menu][data-vx-phase="closing"] [data-vx-menu-separator] {
+  opacity: 0;
+  transform: translate(-3px, -7px) scale(0.99);
+  transition:
+    opacity 0.13s ease,
+    transform 0.2s cubic-bezier(0.3, 0, 0.2, 1);
+}
+
+/* The exit is a wave, not a switch. Every row leaving at once, on the same
+   frame the panel starts collapsing, is what read as "the content pops and
+   the box shrinks, all in one go": the panel holds its full size for the
+   first 14% of the close (morphKeyframes' CLOSE_HOLD) precisely so this wave
+   has a stage to play on. It runs top-down — toward the trigger, which is
+   also the order the rows arrived in — and is finished by ~210ms, well
+   before the ghost owns the frame (~250ms into the 460ms close), so nothing
+   is still aboard when the body reads as the returning icon.
+
+   Positional, not per-part: the wave is spatial, so a separator counts as a
+   row like anything else. The ghost is excluded — it is the panel's own
+   WAAPI-driven passenger, not menu content. */
+[data-vx-menu][data-vx-phase="closing"] > *:nth-child(2):not(.vx-menu-ghost) {
+  transition-delay: 0.022s;
+}
+[data-vx-menu][data-vx-phase="closing"] > *:nth-child(3):not(.vx-menu-ghost) {
+  transition-delay: 0.044s;
+}
+[data-vx-menu][data-vx-phase="closing"] > *:nth-child(4):not(.vx-menu-ghost) {
+  transition-delay: 0.064s;
+}
+[data-vx-menu][data-vx-phase="closing"] > *:nth-child(5):not(.vx-menu-ghost) {
+  transition-delay: 0.08s;
+}
+[data-vx-menu][data-vx-phase="closing"] > *:nth-child(n + 6):not(.vx-menu-ghost) {
+  transition-delay: 0.092s;
+}
+
+/* Items reveal after the streak phase of the morph (~40% of 500ms). */
+[data-vx-menu][data-vx-phase="opening"] [data-vx-menu-item]:nth-child(1) {
+  transition-delay: 0.2s;
+}
+[data-vx-menu][data-vx-phase="opening"] [data-vx-menu-item]:nth-child(2) {
+  transition-delay: 0.25s;
+}
+[data-vx-menu][data-vx-phase="opening"] [data-vx-menu-item]:nth-child(3) {
+  transition-delay: 0.3s;
+}
+[data-vx-menu][data-vx-phase="opening"] [data-vx-menu-item]:nth-child(4) {
+  transition-delay: 0.35s;
+}
+[data-vx-menu][data-vx-phase="opening"] [data-vx-menu-item]:nth-child(n + 5) {
+  transition-delay: 0.4s;
+}
+
+[data-vx-menu-separator] {
+  height: 1px;
+  margin: 0.25rem 0.75rem;
+  background: color-mix(in srgb, var(--vx-color-on-surface), transparent 90%);
+}
+
+[data-vx-menu-label] {
+  padding: 0.5rem 1.125rem 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, currentcolor, transparent 45%);
+  white-space: nowrap;
+}
+
+.vx-menu-item__shortcut {
+  flex: none;
+  padding-left: 1.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.02em;
+  opacity: 0.45;
+}
+
+.vx-menu-item__icon {
+  display: inline-flex;
+  flex: none;
+  width: 1.25em;
+  height: 1.25em;
+  align-items: center;
+  justify-content: center;
+}
+
+.vx-menu-item__icon > svg {
+  width: 100%;
+  height: 100%;
+}
+
+.vx-menu-item__label {
+  flex: 1;
+  text-align: left;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vx-menu-item] {
+    transition: none;
+  }
+}

@@ -1,0 +1,70 @@
+/* Card — composable surface on the kit's surface ladder: the card sits on
+   --vx-surface-1 and its raised looks reach for --vx-surface-2 (overlays
+   like Menu/Dialog take --vx-surface-3; see tokens.css).
+
+   Two separation rules, one per mode, because a page is either white or
+   near-black and each kills a different cue:
+   - LIGHT: a drop shadow does not register on white, so elevated and soft
+     also carry a hairline (--vx-card-raised-border-alpha) — the same edge
+     language as outline.
+   - DARK: shadows do not read at all, so elevated flips to the raised
+     surface (--vx-card-elevated-lift) plus an inset top highlight, and the
+     hairline alpha drops to 0.
+
+   Everything resolves at the .vx-card element itself — mode blocks only flip
+   inherited scalars — so nested opposite-mode islands stay correct AND any
+   of the --vx-card-* tokens can be overridden per instance via `style`. */
+.vx-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--vx-radius-control);
+  background: var(--vx-surface-1);
+  color: var(--vx-color-on-surface);
+  font-family: var(--vx-font-family);
+  /* Inset ring rather than a real border, so swapping variants never
+     changes layout. 0% alpha (dark) renders as fully transparent. */
+  --vx-card-hairline: inset 0 0 0 1px
+    color-mix(
+      in srgb,
+      var(--vx-color-on-surface) var(--vx-card-raised-border-alpha),
+      transparent
+    );
+}
+
+.vx-card[data-vx-variant="outline"] {
+  border: 1px solid
+    color-mix(
+      in srgb,
+      var(--vx-color-on-surface) var(--vx-card-border-alpha),
+      transparent
+    );
+}
+
+.vx-card[data-vx-variant="elevated"] {
+  background: var(
+    --vx-card-elevated-bg,
+    color-mix(
+      in srgb,
+      var(--vx-surface-2) var(--vx-card-elevated-lift),
+      var(--vx-surface-1)
+    )
+  );
+  box-shadow:
+    var(--vx-card-hairline),
+    var(--vx-card-elevated-shadow, var(--vx-card-shadow));
+}
+
+.vx-card[data-vx-variant="soft"] {
+  background: var(--vx-surface-2);
+  box-shadow: var(--vx-card-hairline);
+}
+
+/* padding="none": zero the spacing tokens instead of the padding property,
+   so the first/last-child rules in card-parts.css resolve to 0 too and a
+   per-part override uses the exact same mechanism. */
+.vx-card[data-vx-padding="none"] {
+  --vx-card-padding: 0px;
+  --vx-card-gap: 0px;
+}

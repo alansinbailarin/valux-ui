@@ -1,0 +1,270 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Tile → giant panel, as a View Transition.
+
+   Two named elements carry the whole story: vx-spec-card (the tile's bounds
+   morphing into the panel) and vx-spec-button (the specimen riding from its
+   spot in the wall to the canvas on the panel's right). The browser
+   generates the travel from the two snapshots; this file only decides WHO
+   is named WHEN, and how the journey is paced.
+
+   Names live on one side at a time — the tile is only named while closed,
+   the panel only exists while open. Two elements sharing a name in one
+   snapshot make the engine skip the transition silently, which reads as
+   "it just popped".
+
+   Everything under :root[data-vx-expand] is scoped to THIS transition —
+   pseudo rules are global, and the mode wave must not inherit them (nor
+   vice versa).
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Names exist ONLY while the expand transition is on stage. Filmed during
+   the mode wave: a permanently named element leaves the root snapshot and
+   crossfades on its own, so the wave's front skipped the specimen card
+   entirely. data-vx-expand is set before capture and dropped at finished —
+   exactly the window the names are needed for. */
+:root[data-vx-expand] .mosaic__specimen[data-spec-active]:not(.mosaic__specimen--vacated) {
+  view-transition-name: vx-spec-card;
+}
+
+:root[data-vx-expand]
+  .mosaic__specimen[data-spec-active]:not(.mosaic__specimen--vacated)
+  .specimen-chip {
+  view-transition-name: vx-spec-button;
+}
+
+:root[data-vx-expand] .expand__panel {
+  view-transition-name: vx-spec-card;
+}
+
+:root[data-vx-expand] .expand__canvas .specimen-chip {
+  view-transition-name: vx-spec-button;
+}
+
+/* The journey: 780ms on the kit's drawer curve — lively launch, long silky
+   settle. 520ms read "super rápido": a viewport-sized object needs more
+   time to be READ than a control does, and the front-loaded ease spent the
+   whole trip in its first quarter. Only duration and easing are ours — the
+   UA's generated transform keyframes are the well-trodden composited path. */
+:root[data-vx-expand]::view-transition-group(vx-spec-card),
+:root[data-vx-expand]::view-transition-group(vx-spec-button) {
+  animation-duration: 780ms;
+  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* The surfaces must STRETCH with the travelling group. The UA default
+   (inline 100%, block auto) keeps each image's own aspect ratio, and with a
+   340px card becoming a viewport panel that meant the new image overflowed
+   and CLIPPED — the "a piece disappears" frame, and why the two states read
+   as different components. Stretched, the plane itself morphs. */
+:root[data-vx-expand]::view-transition-old(vx-spec-card),
+:root[data-vx-expand]::view-transition-new(vx-spec-card) {
+  width: 100%;
+  height: 100%;
+}
+
+/* The liquid: the journey blurs mid-flight and lands sharp — the kit
+   morph's motion language, applied to the pair so both surfaces smear
+   together instead of reading as a crossfade of two stills. */
+:root[data-vx-expand]::view-transition-image-pair(vx-spec-card) {
+  animation: vx-expand-liquid 780ms cubic-bezier(0.32, 0.72, 0, 1) both;
+}
+
+@keyframes vx-expand-liquid {
+  0% {
+    filter: blur(0);
+  }
+
+  45% {
+    filter: blur(7px);
+  }
+
+  100% {
+    filter: blur(0);
+  }
+}
+
+/* The specimen is pixel-identical in both states: crossfading two identical
+   images mid-flight only shimmers, so the new one rides alone. */
+:root[data-vx-expand]::view-transition-old(vx-spec-button) {
+  animation: none;
+  opacity: 0;
+}
+
+/* The marble holds its breath here too: the "new" side is a live capture,
+   and the flow drift would force full-page repaints under every frame of
+   the journey. */
+:root[data-vx-expand] .flow {
+  animation-play-state: paused;
+}
+
+/* ── The expanded state ──────────────────────────────────────────────── */
+
+/* A dialog holds the page still behind it. */
+:root[data-vx-modal] {
+  overflow: hidden;
+}
+
+.expand {
+  position: fixed;
+  inset: 0;
+  /* BELOW the kit's overlay plane (1200) on purpose: a Menu or Select
+     opened inside the canvas portals to <body> at 1200 and must float over
+     this panel. The page content it covers is all z-auto. */
+  z-index: 1150;
+}
+
+.expand__scrim {
+  position: absolute;
+  inset: 0;
+  background: rgb(0 0 0 / 42%);
+}
+
+.expand__panel {
+  position: absolute;
+  /* The hero card's insets and radius: the panel is the same object at a
+     larger station in life. */
+  inset: clamp(1rem, 3vw, 2.25rem);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: clamp(1.5rem, 3vw, 2.75rem);
+  /* In dark the page base vanished into the scrim — the panel is a raised
+     place, one clear step above the page it covers. */
+  background: light-dark(
+    var(--vx-color-surface-base),
+    color-mix(in srgb, var(--vx-color-on-surface) 7%, var(--vx-color-surface-base))
+  );
+  color: var(--vx-color-on-surface);
+}
+
+.expand__bar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem 1.25rem 0;
+}
+
+.expand__body {
+  display: grid;
+  flex: 1;
+  gap: 1.125rem;
+  grid-template-columns: 1fr;
+  min-height: 0;
+  padding: 1.125rem clamp(1.125rem, 2.5vw, 2rem) clamp(1.125rem, 2.5vw, 2rem);
+}
+
+@media (min-width: 48rem) {
+  .expand__body {
+    /* The canvas owns the right side; the detail panel the left. */
+    grid-template-columns: 1fr minmax(20rem, 42%);
+  }
+}
+
+/* ── The detail panel ────────────────────────────────────────────────── */
+
+.expand__detail {
+  min-width: 0;
+  overflow-y: auto;
+  padding: 0.5rem 0.25rem 0;
+}
+
+.expand__name {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.expand__description {
+  width: 100%;
+  margin: 0.75rem 0 0;
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--vx-color-on-surface), transparent 30%);
+  text-wrap: pretty;
+}
+
+/* The knobs: kit controls, stacked with air. Radio OPTIONS flow inline so
+   six colors read as a row of chips, not a tower — the group wrapper keeps
+   its label above. */
+.expand__props {
+  display: flex;
+  flex-direction: column;
+  gap: 1.375rem;
+  margin-top: 2rem;
+}
+
+.expand__props .vx-radio-group {
+  display: flex;
+  /* The kit stacks its groups (settings-form posture); the playground wants
+     chips in a row. */
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.625rem 1.25rem;
+}
+
+.expand__props .vx-radio-group__label {
+  flex-basis: 100%;
+}
+
+/* The canvas: the wall tiles' quiet plane plus a dot lattice, so the empty
+   space reads as a design surface awaiting a specimen — not as absence. */
+.expand__canvas {
+  display: grid;
+  place-items: center;
+  border-radius: calc(var(--vx-radius-control) * 1.5);
+  background-color: light-dark(
+    color-mix(in srgb, var(--vx-color-on-surface) 5%, var(--vx-color-surface-base)),
+    color-mix(in srgb, var(--vx-color-on-surface) 8%, var(--vx-color-surface-base))
+  );
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--vx-color-on-surface) 14%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 22px 22px;
+  background-position: center;
+}
+
+/* The living usage snippet: exactly the code for what the canvas shows
+   right now, colored from the same segments the clipboard copies. */
+.expand__code {
+  position: relative;
+  width: 100%;
+  margin: 2.25rem 0 0;
+  border-radius: var(--vx-radius-control);
+  background: light-dark(
+    color-mix(in srgb, var(--vx-color-on-surface) 5%, var(--vx-color-surface-base)),
+    color-mix(in srgb, var(--vx-color-on-surface) 8%, var(--vx-color-surface-base))
+  );
+}
+
+.expand__code-pre {
+  margin: 0;
+  padding: 1.125rem 3.5rem 1.125rem 1.375rem;
+  overflow-x: auto;
+  font-family: ui-monospace, "SF Mono", monospace;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+}
+
+.expand__copy {
+  position: absolute;
+  top: 0.625rem;
+  right: 0.625rem;
+}
+
+/* Syntax inks, mixed from kit tokens so both modes come free. Restraint on
+   purpose: two hues plus grays — a snippet, not a christmas tree. */
+.tok-kw { color: color-mix(in srgb, var(--vx-color-on-surface), transparent 45%); }
+.tok-punc { color: color-mix(in srgb, var(--vx-color-on-surface), transparent 40%); }
+.tok-tag { font-weight: 600; color: var(--vx-color-on-surface); }
+.tok-attr { color: var(--vx-color-info-foreground); }
+.tok-str { color: var(--vx-color-success-foreground); }
+
+/* The draggable toy: gesture ownership per the kit's hard-won rules. */
+.expand__toy {
+  display: inline-block;
+  touch-action: none;
+  will-change: transform;
+}
+

@@ -1,0 +1,138 @@
+:root {
+  color-scheme: light dark;
+  --vx-color-primary: #171717;
+  --vx-color-primary-solid: #171717;
+  --vx-color-on-primary: #ffffff;
+  --vx-color-primary-foreground: var(--vx-color-primary);
+  --vx-color-surface-base: #ffffff;
+  /* Raised must clear the page by >= 2.5 OKLCH L or a card flattens into a
+     white page (#fafafa was only 1.49 away). See card-contrast.styles.test. */
+  --vx-color-surface-raised-base: #f4f4f5;
+  --vx-color-on-surface: #171717;
+  --vx-color-focus: #2563eb;
+  --vx-color-danger: #dc2626;
+  --vx-color-danger-solid: #dc2626;
+  --vx-color-on-danger: #ffffff;
+  --vx-color-danger-foreground: #b91c1c;
+  --vx-color-success: #16a34a;
+  --vx-color-success-solid: #15803d;
+  --vx-color-on-success: #ffffff;
+  --vx-color-success-foreground: #15803d;
+  --vx-color-warning: #d97706;
+  --vx-color-warning-solid: #f59e0b;
+  --vx-color-on-warning: #451a03;
+  --vx-color-warning-foreground: #b45309;
+  --vx-color-info: #2563eb;
+  --vx-color-info-solid: #2563eb;
+  --vx-color-on-info: #ffffff;
+  --vx-color-info-foreground: #1d4ed8;
+  --vx-surface-tint: 0%;
+  --vx-surface-tint-raised: 0%;
+  /* Overlay plane (--vx-surface-3) controls. Both are plain inherited
+     scalars on purpose: mode blocks flip THESE, never --vx-surface-3
+     itself, so a nested provider that carries no mode still re-derives the
+     overlay from the mode it inherits (see usePortalTheme.ts).
+     - lift 0% -> the overlay sits on surface-1 (light: overlays are the
+       BRIGHTEST plane, white paper floating over the page).
+     - lift 100% -> it sits on surface-2 (dark: lighter than the page).
+     - tint: how much theme primary washes into it. 2.5% keeps a neutral
+       primary at ~1.7 OKLCH L below white (a white page stays white) while
+       a chromatic primary still visibly colors the panel. */
+  --vx-surface-overlay-lift: 0%;
+  --vx-surface-overlay-tint: 2.5%;
+  /* ONE radius for the whole kit: every component (Button, Menu, Dialog, and
+     anything that ships later) shares this pronounced rounding — there are no
+     per-component or per-size radius variants. */
+  --vx-radius-control: 1rem;
+  --vx-control-height: 2.5rem;
+  --vx-control-padding-inline: 1rem;
+  --vx-control-gap: 0.5rem;
+  --vx-button-icon-gap: 0.625rem;
+  --vx-font-family: inherit;
+  --vx-font-size-control: 0.875rem;
+  --vx-font-weight-control: 500;
+  --vx-line-height-control: 1.25rem;
+  --vx-focus-width: 0.125rem;
+  --vx-motion-duration-fast: 150ms;
+  --vx-motion-easing-standard: ease;
+  /* Card instance tokens — all six are public: set them in `style` on a
+     single <Card> and they cascade into every part (see docs/components/
+     card.md). Each is either a literal or resolved at the card element, so
+     an inline override always wins over the mode blocks. */
+  --vx-card-padding: 1rem;
+  --vx-card-gap: 0.5rem;
+  /* elevated's box-shadow list. Mode-flipped: dark swaps the drop shadow
+     for an inset top highlight, because shadows do not read on dark. */
+  --vx-card-shadow: 0 1px 3px rgb(0 0 0 / 0.06), 0 4px 16px rgb(0 0 0 / 0.1);
+  --vx-card-border-alpha: 15%;
+  /* elevated/soft carry a hairline as well as their fill: on a WHITE page a
+     drop shadow alone does not register, so elevation needs an edge. Dark
+     sets 0% — there the raised surface + inset highlight already separate
+     the card from the page. */
+  --vx-card-raised-border-alpha: 15%;
+  /* 0% -> elevated sits on surface-1 (light: a white card floating on the
+     page), 100% -> on surface-2 (dark: lighter than the page). */
+  --vx-card-elevated-lift: 0%;
+  /* Wash behind a part with surface="subtle" (grouped-settings look). */
+  --vx-card-subtle-alpha: 4%;
+  --vx-card-separator-inset: 0px;
+}
+
+:root,
+[data-vx-provider] {
+  --vx-color-surface: color-mix(
+    in srgb,
+    var(--vx-color-surface-base),
+    var(--vx-color-primary) var(--vx-surface-tint)
+  );
+  --vx-color-surface-raised: color-mix(
+    in srgb,
+    var(--vx-color-surface-raised-base),
+    var(--vx-color-primary) var(--vx-surface-tint-raised)
+  );
+  --vx-color-border: color-mix(
+    in srgb,
+    var(--vx-color-surface),
+    var(--vx-color-on-surface) 18%
+  );
+  --vx-color-disabled: color-mix(
+    in srgb,
+    var(--vx-color-surface),
+    var(--vx-color-on-surface) 18%
+  );
+  --vx-color-on-disabled: color-mix(
+    in srgb,
+    var(--vx-color-on-surface),
+    transparent 35%
+  );
+
+  /* ── The surface ladder ────────────────────────────────────────────────
+     ONE set of planes that every component consumes, so Card, Menu, Dialog,
+     Popover and Select can no longer drift into parallel systems:
+
+       --vx-surface-1  page          (the plane content sits on)
+       --vx-surface-2  raised        (cards, grouped content)
+       --vx-surface-3  overlay       (menu / dialog / popover / select)
+
+     Glass is a treatment ON TOP of plane 3, not a replacement: the panels
+     take var(--vx-surface-3), apply their own opacity, and add
+     backdrop-filter. --vx-color-surface / --vx-color-surface-raised stay as
+     the aliases that themes and app CSS already use.
+
+     Every one of these is DERIVED here rather than re-declared per mode, and
+     the mode blocks only flip inherited scalars (--vx-surface-overlay-*).
+     That is what keeps a nested [data-vx-provider] that carries no mode of
+     its own — and a portal node themed by usePortalTheme — resolving the
+     ladder from the mode it INHERITS instead of snapping back to light. */
+  --vx-surface-1: var(--vx-color-surface);
+  --vx-surface-2: var(--vx-color-surface-raised);
+  --vx-surface-3: color-mix(
+    in srgb,
+    color-mix(
+      in srgb,
+      var(--vx-surface-2) var(--vx-surface-overlay-lift),
+      var(--vx-surface-1)
+    ),
+    var(--vx-color-primary) var(--vx-surface-overlay-tint)
+  );
+}

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1500" viewBox="0 0 2400 1500">
+  <!-- Baked marble, used as a CSS mask.
+
+       The turbulence lives in here rather than in a `filter` on the element
+       so the browser rasterises it once, on load, and never again. A filter
+       applied live re-runs whenever the layer holding it is repainted or
+       transformed, which is what made the moving versions cost 50ms and
+       233ms a frame; a mask is just a cached bitmap the compositor can slide
+       around for free.
+
+       White is opaque ribbon, transparent is void: alpha, because that is
+       what CSS `mask-image` reads by default. Colour is deliberately absent,
+       it comes from the flow-ribbon custom property on the element
+       underneath, so the hero stays themeable.
+
+       Careful editing this: an XML comment may not contain two consecutive
+       hyphens, so a CSS custom property cannot be named literally in here.
+       Doing so makes the whole file invalid and the browser silently refuses
+       to decode it, which shows up as the mask hiding everything. -->
+  <defs>
+    <filter
+      id="warp"
+      x="-25%"
+      y="-25%"
+      width="150%"
+      height="150%"
+      color-interpolation-filters="sRGB"
+    >
+      <feTurbulence
+        type="fractalNoise"
+        baseFrequency="0.0016 0.0042"
+        numOctaves="3"
+        seed="11"
+        result="noise"
+      />
+      <feDisplacementMap
+        in="SourceGraphic"
+        in2="noise"
+        scale="420"
+        xChannelSelector="R"
+        yChannelSelector="G"
+      />
+    </filter>
+
+    <!-- A 74px period with soft shoulders. Hard edges survive displacement as
+         torn paper; a gradient stretches into ribbon. -->
+    <linearGradient
+      id="stripes"
+      x1="0"
+      y1="0"
+      x2="74"
+      y2="0"
+      gradientUnits="userSpaceOnUse"
+      spreadMethod="repeat"
+      gradientTransform="rotate(25)"
+    >
+      <stop offset="0" stop-color="#fff" stop-opacity="0" />
+      <stop offset="0.3" stop-color="#fff" stop-opacity="0" />
+      <stop offset="0.5" stop-color="#fff" stop-opacity="1" />
+      <stop offset="0.7" stop-color="#fff" stop-opacity="0" />
+      <stop offset="1" stop-color="#fff" stop-opacity="0" />
+    </linearGradient>
+  </defs>
+
+  <rect width="2400" height="1500" fill="url(#stripes)" filter="url(#warp)" />
+</svg>

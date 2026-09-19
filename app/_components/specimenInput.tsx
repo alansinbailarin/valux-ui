@@ -1,0 +1,105 @@
+import { useState } from "react";
+import { Input } from "@/src";
+import { MagnifyingGlassIcon, CheckIcon } from "@heroicons/react/20/solid";
+import type { Specimen } from "./specimenTypes";
+
+export const INPUT_SPECIMEN: Specimen = {
+  id: "input",
+  label: "Input",
+  node: <Input label="Email address" placeholder="Enter your email" type="email" />,
+  description: "Robust text field with built-in validation states, character counting, and seamless prefix or suffix integration",
+  height: 280,
+  controls: [
+    { kind: "options", prop: "type", options: ["text", "email", "password", "number", "search"], initial: "text" },
+    { kind: "options", prop: "variant", options: ["outline", "soft"], initial: "outline" },
+    { kind: "options", prop: "size", options: ["sm", "md", "lg"], initial: "md" },
+    { kind: "options", prop: "tone", options: ["neutral", "danger", "success", "warning"], initial: "neutral" },
+    { kind: "flag", prop: "disabled" },
+    { kind: "flag", prop: "withHint" },
+    { kind: "flag", prop: "withPrefix" },
+    { kind: "flag", prop: "withSuffix" },
+    { kind: "flag", prop: "showCount" },
+  ],
+  render: function InputRenderer(v) {
+    const [value, setValue] = useState("");
+    
+    const tone = v.tone !== "neutral" ? (v.tone as "danger" | "success" | "warning") : undefined;
+    let message = undefined;
+    if (tone === "danger") message = "This username is taken.";
+    if (tone === "success") message = "Username available!";
+    if (tone === "warning") message = "Caps lock is on.";
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', width: '20rem' }}>
+        <Input
+          type={v.type as "text" | "email" | "password" | "number" | "search"}
+          variant={v.variant as "outline" | "soft"}
+          size={v.size as "sm" | "md" | "lg"}
+          tone={tone}
+          disabled={Boolean(v.disabled)}
+          label="Username"
+          placeholder="Enter your username"
+          hint={v.withHint ? "Only letters, numbers, and underscores allowed." : undefined}
+          message={message}
+          prefix={v.withPrefix ? <MagnifyingGlassIcon /> : undefined}
+          suffix={v.withSuffix ? <CheckIcon /> : undefined}
+          showCount={Boolean(v.showCount)}
+          maxLength={v.showCount ? 50 : undefined}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+        />
+        
+        <div style={{ fontSize: '0.875rem', color: 'color-mix(in srgb, var(--vx-color-on-surface) 60%, transparent)', fontFamily: 'monospace' }}>
+          Current value: {value || '""'}
+        </div>
+      </div>
+    );
+  },
+  renderSnippet: (v) => {
+    const props = [];
+    
+    if (v.type && v.type !== "text") props.push(`type="${v.type}"`);
+    if (v.variant && v.variant !== "outline") props.push(`variant="${v.variant}"`);
+    if (v.size && v.size !== "md") props.push(`size="${v.size}"`);
+    if (v.tone && v.tone !== "neutral") props.push(`tone="${v.tone}"`);
+    if (v.disabled) props.push(`disabled`);
+    
+    props.push(`label="Username"`);
+    props.push(`placeholder="Enter your username"`);
+    if (v.withHint) props.push(`hint="Only letters, numbers, and underscores allowed."`);
+    
+    if (v.tone === "danger") props.push(`message="This username is taken."`);
+    if (v.tone === "success") props.push(`message="Username available!"`);
+    if (v.tone === "warning") props.push(`message="Caps lock is on."`);
+    
+    if (v.withPrefix) props.push(`prefix={<MagnifyingGlassIcon />}`);
+    if (v.withSuffix) props.push(`suffix={<CheckIcon />}`);
+    if (v.showCount) {
+      props.push(`showCount`);
+      props.push(`maxLength={50}`);
+    }
+
+    props.push(`value={value}`);
+    props.push(`onChange={(e) => setValue(e.target.value)}`);
+    
+    const propsString = props.length > 0 ? `\n  ${props.join("\n  ")}\n` : "";
+    
+    const imports = [];
+    if (v.withPrefix) imports.push("MagnifyingGlassIcon");
+    if (v.withSuffix) imports.push("CheckIcon");
+    const iconsImport = imports.length > 0 ? `\nimport { ${imports.join(", ")} } from "@heroicons/react/20/solid";` : "";
+
+    const code = `import { useState } from "react";
+import { Input } from "@valux/ui";${iconsImport}
+
+export function Example() {
+  const [value, setValue] = useState("");
+
+  return (
+    <Input${propsString}/>
+  );
+}
+`;
+    return [{ tok: "plain", text: code }];
+  }
+};

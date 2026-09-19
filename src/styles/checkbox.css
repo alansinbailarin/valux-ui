@@ -1,0 +1,130 @@
+/* Checkbox — native input styled to the kit: soft-cornered box (radius
+   ~35%, family look), checkmark that DRAWS itself, indeterminate bar.
+   All colors derive from tokens. */
+.vx-check {
+  --vx-check-size: 1.25rem;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  cursor: pointer;
+  font-family: var(--vx-font-family);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.vx-check__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vx-check__box {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--vx-check-size);
+  height: var(--vx-check-size);
+  margin-top: 0.0625rem;
+  border: 1px solid color-mix(in srgb, var(--vx-color-on-surface), transparent 74%);
+  border-radius: calc(var(--vx-check-size) * 0.35);
+  background: transparent;
+  /* The mark uses the SURFACE color (Switch-chip philosophy): white
+     stroke on light themes, dark stroke on dark — always contrasting
+     with the primary fill. */
+  color: var(--vx-color-surface);
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    transform 0.18s cubic-bezier(0.3, 1.3, 0.4, 1);
+}
+
+.vx-check__box > svg {
+  width: calc(var(--vx-check-size) * 0.7);
+  height: calc(var(--vx-check-size) * 0.7);
+}
+
+.vx-check[data-vx-size="sm"] { --vx-check-size: 1rem; }
+.vx-check[data-vx-size="lg"] { --vx-check-size: 1.5rem; }
+
+.vx-check[data-vx-size="sm"] .vx-check__label { font-size: 0.8125rem; }
+.vx-check[data-vx-size="lg"] .vx-check__label { font-size: 1rem; }
+
+/* The mark draws itself in (dash from its own length to 0). */
+.vx-check__mark {
+  stroke-dasharray: 12;
+  stroke-dashoffset: 12;
+}
+
+.vx-check__bar {
+  stroke-dasharray: 7;
+  stroke-dashoffset: 7;
+}
+
+.vx-check__input:checked + .vx-check__box,
+.vx-check__input:indeterminate + .vx-check__box {
+  border-color: var(--vx-color-primary);
+  background: var(--vx-color-primary);
+}
+
+.vx-check__input:checked + .vx-check__box .vx-check__mark {
+  transition: stroke-dashoffset 0.22s cubic-bezier(0.3, 0.9, 0.4, 1) 0.05s;
+  stroke-dashoffset: 0;
+}
+
+.vx-check__input:indeterminate + .vx-check__box .vx-check__mark {
+  stroke-dashoffset: 12;
+}
+
+.vx-check__input:indeterminate + .vx-check__box .vx-check__bar {
+  transition: stroke-dashoffset 0.2s cubic-bezier(0.3, 0.9, 0.4, 1);
+  stroke-dashoffset: 0;
+}
+
+/* Press feedback: the box dips like a key. */
+.vx-check:active .vx-check__box {
+  transform: scale(0.92);
+}
+
+.vx-check__input:focus-visible + .vx-check__box {
+  box-shadow: 0 0 0 var(--vx-focus-width) var(--vx-color-focus);
+}
+
+.vx-check__input:disabled + .vx-check__box {
+  opacity: 0.45;
+}
+
+.vx-check:has(.vx-check__input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.vx-check__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.vx-check__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--vx-color-on-surface);
+}
+
+.vx-check__description {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--vx-color-on-surface), transparent 40%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-check__box,
+  .vx-check__mark,
+  .vx-check__bar {
+    transition: none;
+  }
+}

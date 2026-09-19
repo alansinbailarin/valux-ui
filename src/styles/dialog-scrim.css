@@ -1,0 +1,55 @@
+[data-vx-dialog-scrim] {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--vx-dialog-z) - 1);
+  background: var(--vx-dialog-scrim);
+  -webkit-backdrop-filter: var(--vx-dialog-scrim-backdrop);
+  backdrop-filter: var(--vx-dialog-scrim-backdrop);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Keyframes (not transitions): the scrim mounts already in its opening phase,
+   and transitions never run on insertion. It joins the choreography late
+   (~30% of the open morph) so the streak reads against a clean page first. */
+[data-vx-dialog-scrim][data-vx-phase="opening"] {
+  animation: vx-dialog-scrim-in 0.28s ease 0.18s both;
+}
+
+[data-vx-dialog-scrim][data-vx-phase="open"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-vx-dialog-scrim][data-vx-phase="closing"] {
+  animation: vx-dialog-scrim-out 0.22s ease both;
+}
+
+@keyframes vx-dialog-scrim-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes vx-dialog-scrim-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vx-dialog-scrim][data-vx-phase="opening"],
+  [data-vx-dialog-scrim][data-vx-phase="closing"] {
+    animation: none;
+  }
+
+  [data-vx-dialog-scrim][data-vx-phase="opening"] {
+    opacity: 1;
+  }
+}

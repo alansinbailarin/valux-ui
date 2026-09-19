@@ -1,0 +1,119 @@
+/* Radio — native input, circular ring (radios ARE circles). Checked
+   INVERTS: the outer circle fills with the primary and the popping dot
+   is the SURFACE color (white on light, dark on dark) — same philosophy
+   as the Switch chip and the Checkbox mark. */
+.vx-radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  font-family: var(--vx-font-family);
+}
+
+.vx-radio-group__label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--vx-color-on-surface), transparent 22%);
+  margin-bottom: 0.125rem;
+}
+
+.vx-radio {
+  --vx-radio-size: 1.25rem;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.vx-radio__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vx-radio__ring {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--vx-radio-size);
+  height: var(--vx-radio-size);
+  margin-top: 0.0625rem;
+  border: 1px solid color-mix(in srgb, var(--vx-color-on-surface), transparent 74%);
+  border-radius: 999px;
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    transform 0.18s cubic-bezier(0.3, 1.3, 0.4, 1);
+}
+
+.vx-radio[data-vx-size="sm"] { --vx-radio-size: 1rem; }
+.vx-radio[data-vx-size="lg"] { --vx-radio-size: 1.5rem; }
+
+.vx-radio[data-vx-size="sm"] .vx-radio__label { font-size: 0.8125rem; }
+.vx-radio[data-vx-size="lg"] .vx-radio__label { font-size: 1rem; }
+
+.vx-radio__dot {
+  width: calc(var(--vx-radio-size) * 0.5);
+  height: calc(var(--vx-radio-size) * 0.5);
+  border-radius: 999px;
+  background: var(--vx-color-surface);
+  transform: scale(0);
+  transition: transform 0.22s cubic-bezier(0.3, 1.4, 0.4, 1);
+}
+
+.vx-radio__input:checked + .vx-radio__ring {
+  border-color: var(--vx-color-primary);
+  background: var(--vx-color-primary);
+}
+
+.vx-radio__input:checked + .vx-radio__ring > .vx-radio__dot {
+  transform: scale(1);
+}
+
+.vx-radio:active .vx-radio__ring {
+  transform: scale(0.92);
+}
+
+.vx-radio__input:focus-visible + .vx-radio__ring {
+  box-shadow: 0 0 0 var(--vx-focus-width) var(--vx-color-focus);
+}
+
+.vx-radio__input:disabled + .vx-radio__ring {
+  opacity: 0.45;
+}
+
+.vx-radio:has(.vx-radio__input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+.vx-radio__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.vx-radio__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--vx-color-on-surface);
+}
+
+.vx-radio__description {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--vx-color-on-surface), transparent 40%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-radio__ring,
+  .vx-radio__dot {
+    transition: none;
+  }
+}

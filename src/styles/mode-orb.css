@@ -1,0 +1,203 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   The mode orb, and the wave it sets off.
+
+   A fixed sphere, bottom right, always present. Clicking it flips dark ⁄
+   light — not as a swap but as a wave: the browser photographs the old page,
+   applies the new mode, photographs that too, and the new photograph is
+   revealed through a circle growing out of the orb. Components change color
+   as the front passes over them because what is sweeping IS the finished
+   new page.
+
+   ModeOrb.tsx supplies the three values CSS cannot know (when, from where,
+   how far) as --vx-wave-* on the root; everything visual lives here.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.vx-mode-orb {
+  position: fixed;
+  right: clamp(1rem, 4vw, 2rem);
+  bottom: clamp(1rem, 4vw, 2rem);
+  /* One step above the kit's overlay plane (--vx-menu-z: 1200): the switch
+     stays reachable even under an open dialog's scrim. */
+  z-index: 1300;
+  /* 40% smaller than the original 3rem: a quiet resident, not a control
+     begging for attention. Still above the 24px WCAG floor. */
+  width: 1.8rem;
+  height: 1.8rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  /* No cursor here on purpose: cursor.css dresses every <button> with the
+     landing's arrow. An element-level `pointer` would swap in the OS hand
+     over exactly this control. */
+}
+
+/* The sphere is a ::before, and every scale lands on IT — never on the
+   button. Scaling the button itself shrank its hit box mid-press: near the
+   edge, the ball slipped out from under a stationary pointer, the cursor
+   fell back to the page (verified with elementFromPoint), hover dropped and
+   the release could miss the button entirely. The hit target never moves;
+   only the picture of the ball does. */
+.vx-mode-orb::before {
+  position: absolute;
+  content: "";
+  inset: 0;
+  border: 1px solid rgb(0 0 0 / 18%);
+  border-radius: 50%;
+
+  /* The face previews the mode the click will bring, so on a light page the
+     orb is the dark sphere. Off-centre highlight is what makes it a ball
+     rather than a disc. */
+  background: radial-gradient(
+    circle at 32% 28%,
+    #52525b,
+    #27272a 55%,
+    #09090b
+  );
+  box-shadow: 0 2px 14px rgb(0 0 0 / 30%);
+  transition: transform 160ms cubic-bezier(0.2, 0.75, 0.3, 1);
+}
+
+.vx-mode-orb:active::before {
+  transform: scale(0.92);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .vx-mode-orb:hover::before {
+    transform: scale(1.08);
+  }
+
+  .vx-mode-orb:active::before {
+    transform: scale(0.92);
+  }
+}
+
+.vx-mode-orb:focus-visible {
+  outline: 2px solid var(--vx-color-focus);
+  outline-offset: 3px;
+}
+
+/* Dark page → light sphere. Three-state dance: explicit dark, or system dark
+   not explicitly overridden to light. */
+:root[data-vx-mode="dark"] .vx-mode-orb::before {
+  border-color: rgb(255 255 255 / 22%);
+  background: radial-gradient(circle at 32% 28%, #ffffff, #e4e4e7 55%, #a1a1aa);
+  box-shadow: 0 2px 14px rgb(0 0 0 / 55%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-vx-mode="light"]) .vx-mode-orb::before {
+    border-color: rgb(255 255 255 / 22%);
+    background: radial-gradient(
+      circle at 32% 28%,
+      #ffffff,
+      #e4e4e7 55%,
+      #a1a1aa
+    );
+    box-shadow: 0 2px 14px rgb(0 0 0 / 55%);
+  }
+}
+
+/* ── The wave ──────────────────────────────────────────────────────────────
+   Scoped by [data-vx-wave], which ModeOrb sets only for the theme flip:
+   these pseudos are global to every view transition on the page, and a
+   route navigation must not inherit the theme's wipe.
+
+   The old snapshot holds still underneath (its default crossfade replaced by
+   nothing); the new one is clipped to a circle growing from the orb. The
+   kit's own ease-out keeps the wave on the same motion signature as the
+   morph: fast off the mark, gentle arrival at the far corner. */
+
+/* Two stages, because the animation runs on a clock while the first frames
+   after snapshot capture are the most expensive ones the page ever paints.
+   Released immediately, the wave burned its opening ~300ms on frames nobody
+   saw and materialised mid-screen — already a third grown (measured: first
+   presented frame at 167ms of an 850ms run). So the arming stage holds the
+   new snapshot at radius zero, and ModeOrb releases "go" only after the
+   compositor has actually presented a frame (ready + double rAF): the
+   growth starts at 0 on a warm pipeline, visibly FROM the orb. */
+/* While a view transition runs, document rendering is suspended and EVERY
+   hit-test lands on the root — verified: pointer-events computes `none` on
+   the whole pseudo-tree and elementFromPoint still returns <html>. A
+   during-wave cursor override used to paper over the resulting flicker;
+   cursor.css made it obsolete by giving root and orb the SAME drawing, so
+   there is nothing left to flicker. The pseudo rule stays for the day
+   engines honour pass-through, making the orb genuinely re-clickable
+   mid-wave. */
+:root[data-vx-wave]::view-transition {
+  pointer-events: none;
+}
+
+:root[data-vx-wave]::view-transition-old(root) {
+  animation: none;
+}
+
+:root[data-vx-wave]::view-transition-new(root) {
+  animation: none;
+  /* Belt AND suspenders. `animation: none` alone removed the UA crossfade —
+     whose starting state was the only thing keeping this snapshot invisible
+     — so any frame where the armed clip failed to apply painted the ENTIRE
+     new theme at full opacity: the pre-wave flash. Held transparent AND
+     clipped, neither failure mode can show anything; the WAAPI wave carries
+     its own opacity (1,1) while it plays. */
+  opacity: 0;
+  clip-path: circle(0 at var(--vx-wave-x) var(--vx-wave-y));
+}
+
+:root[data-vx-wave="go"]::view-transition-new(root) {
+  animation: vx-wave 850ms cubic-bezier(0.37, 0, 0.63, 1) both;
+  opacity: 1;
+}
+
+/* The foam riding the wavefront. It lives in the LIVE page: ModeOrb scales
+   it in lockstep with the snapshot's clip (same clock, same curve), so the
+   hard clip line always cuts through its brightest rim — the inner half of
+   the glow stays aboard, softening the front into a crest. Outside the
+   clip it simply doesn't exist yet, which is exactly right: the wave has
+   not arrived there.
+
+   Base state is scale(0): both snapshots capture it collapsed, so it never
+   prints on the old side, and in the crestless fallback path it never
+   appears at all. */
+.vx-wave-crest {
+  position: fixed;
+  z-index: 1290; /* over the page, under the orb */
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  background: radial-gradient(
+    circle closest-side,
+    transparent 78%,
+    rgb(255 255 255 / 4%) 86%,
+    rgb(255 255 255 / 45%) 96%,
+    rgb(255 255 255 / 72%) 100%
+  );
+  will-change: transform, opacity;
+  pointer-events: none;
+}
+
+/* The crest is drawn in the ARRIVING theme's ink. By the time it animates,
+   apply() has already flipped data-vx-mode to the destination, so this
+   selector reads the NEW mode: revealing light, the foam is dark — white
+   foam over a near-white page was invisible, which the filmstrip showed. */
+[data-vx-mode="light"] .vx-wave-crest {
+  background: radial-gradient(
+    circle closest-side,
+    transparent 78%,
+    rgb(9 9 11 / 4%) 86%,
+    rgb(9 9 11 / 30%) 96%,
+    rgb(9 9 11 / 52%) 100%
+  );
+}
+
+@keyframes vx-wave {
+  from {
+    clip-path: circle(0 at var(--vx-wave-x) var(--vx-wave-y));
+  }
+
+  to {
+    clip-path: circle(var(--vx-wave-r) at var(--vx-wave-x) var(--vx-wave-y));
+  }
+}

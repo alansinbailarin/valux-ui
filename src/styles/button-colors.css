@@ -1,0 +1,41 @@
+.vx-button[data-vx-color="primary"] {
+  --vx-button-solid-tone: var(--vx-color-primary-solid);
+  --vx-button-accent-tone: var(--vx-color-primary);
+  --vx-button-on-tone: var(--vx-color-on-primary);
+  --vx-button-foreground-tone: var(--vx-color-primary-foreground);
+}
+
+.vx-button[data-vx-color="neutral"] {
+  --vx-button-solid-tone: var(--vx-color-on-surface);
+  --vx-button-accent-tone: var(--vx-color-on-surface);
+  --vx-button-on-tone: var(--vx-color-surface);
+  --vx-button-foreground-tone: var(--vx-color-on-surface);
+}
+
+.vx-button[data-vx-color="danger"] {
+  --vx-button-solid-tone: var(--vx-color-danger-solid);
+  --vx-button-accent-tone: var(--vx-color-danger);
+  --vx-button-on-tone: var(--vx-color-on-danger);
+  --vx-button-foreground-tone: var(--vx-color-danger-foreground);
+}
+
+.vx-button[data-vx-color="success"] {
+  --vx-button-solid-tone: var(--vx-color-success-solid);
+  --vx-button-accent-tone: var(--vx-color-success);
+  --vx-button-on-tone: var(--vx-color-on-success);
+  --vx-button-foreground-tone: var(--vx-color-success-foreground);
+}
+
+.vx-button[data-vx-color="warning"] {
+  --vx-button-solid-tone: var(--vx-color-warning-solid);
+  --vx-button-accent-tone: var(--vx-color-warning);
+  --vx-button-on-tone: var(--vx-color-on-warning);
+  --vx-button-foreground-tone: var(--vx-color-warning-foreground);
+}
+
+.vx-button[data-vx-color="info"] {
+  --vx-button-solid-tone: var(--vx-color-info-solid);
+  --vx-button-accent-tone: var(--vx-color-info);
+  --vx-button-on-tone: var(--vx-color-on-info);
+  --vx-button-foreground-tone: var(--vx-color-info-foreground);
+}

@@ -1,0 +1,59 @@
+/* Declared on providers too so portaled menus recompute the derived values
+   from their inherited theme instead of :root's. */
+:root,
+[data-vx-provider] {
+  --vx-menu-z: 1200; /* equal to dialogs: later-opened surface stacks above */
+  /* Glass material: the kit's overlay plane (--vx-surface-3) at the menu's
+     own opacity, over a backdrop blur. The plane already carries the mode
+     flip (near-white in light, raised + primary wash in dark) and the small
+     primary tint that lets a custom theme color the panel — glass is a
+     treatment ON TOP of the ladder, it does not replace it. No drop shadow.
+     Only the OPACITY is mode-flipped below, and only as an inherited scalar,
+     so a nested provider carrying no mode still derives the right surface. */
+  --vx-menu-surface: color-mix(
+    in srgb,
+    var(--vx-surface-3) var(--vx-menu-opacity),
+    transparent
+  );
+  --vx-menu-opacity: 92%;
+  --vx-menu-lowlight: rgba(9, 9, 11, 0.05);
+  --vx-menu-backdrop: blur(20px) saturate(180%);
+  --vx-menu-max-height: min(60vh, 24rem);
+  /* Panels: rounder than controls (same 1.5x as the dialog). Items: full
+     pills on hover. Both derive from / pair with the kit's single token. */
+  --vx-menu-radius: calc(var(--vx-radius-control) * 1.5);
+  --vx-menu-padding: 0.375rem;
+  --vx-menu-item-padding: 0.6875rem 1.125rem;
+  --vx-menu-item-gap: 0.75rem;
+  --vx-menu-item-radius: 999px;
+  --vx-menu-item-hover: color-mix(
+    in srgb,
+    var(--vx-color-on-surface),
+    transparent 95%
+  );
+}
+
+[data-vx-mode="light"],
+[data-vx-mode="system"] {
+  --vx-menu-opacity: 92%;
+  --vx-menu-lowlight: rgba(9, 9, 11, 0.05);
+}
+
+[data-vx-mode="dark"] {
+  --vx-menu-opacity: 82%;
+  --vx-menu-lowlight: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  /* :where() gates the match without touching specificity: a bare `:root`
+     here matched <html> even when it carried an explicit data-vx-mode="light",
+     and — being equal specificity (0,1,0) but later in the file — beat the
+     light block on every dark-OS machine. Root-level mode forcing (the
+     no-FOUC pattern) could never reach light. The guard steps aside for
+     explicit light; explicit dark agrees with these values anyway. */
+  :root:where(:not([data-vx-mode="light"])),
+  [data-vx-mode="system"] {
+    --vx-menu-opacity: 82%;
+    --vx-menu-lowlight: transparent;
+  }
+}

@@ -1,0 +1,141 @@
+/* Layer promotion while morphing (see dialog-content.css). */
+[data-vx-menu][data-vx-phase="opening"],
+[data-vx-menu][data-vx-phase="closing"] {
+  will-change: transform, filter;
+}
+
+[data-vx-menu] {
+  z-index: var(--vx-menu-z);
+  width: max-content;
+  max-height: var(--vx-menu-max-height);
+  padding: var(--vx-menu-padding);
+  overflow-x: hidden;
+  overflow-y: auto;
+  transform-origin: top left;
+  border: 1px solid
+    color-mix(in srgb, var(--vx-color-on-surface), transparent 92%);
+  border-radius: var(--vx-menu-radius);
+  background: var(--vx-menu-surface);
+  -webkit-backdrop-filter: var(--vx-menu-backdrop);
+  backdrop-filter: var(--vx-menu-backdrop);
+  color: var(--vx-color-on-surface);
+  box-shadow: inset 0 -1px 0 var(--vx-menu-lowlight);
+  font-family: var(--vx-font-family);
+}
+
+.vx-menu-trigger[data-vx-menu-origin="hidden"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* While closing, the streak IS the body: the trigger stays hidden so nothing
+   sits statically behind it, and only reappears at the tail (~70% of the
+   368ms close) beneath the landed panel, which then crossfades out on top. */
+.vx-menu-trigger[data-vx-menu-origin="closing"] {
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.1s ease 0.24s;
+}
+
+.vx-menu-trigger__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(1);
+  transition: transform 0.24s cubic-bezier(0.25, 0.8, 0.3, 1);
+}
+
+/* asChild wraps the child's content, so size icons through the wrapper too
+   (mirrors the Button icon sizing that expects a direct svg child). */
+.vx-menu-trigger__content > svg {
+  width: 1.375em;
+  height: 1.375em;
+}
+
+.vx-menu-trigger[data-vx-menu-origin="hidden"] .vx-menu-trigger__content {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: none;
+}
+
+/* The ghost lands compressed; the real content takes over at those pixels and
+   rebounds small -> natural with a springy settle (the jelly wobble), running
+   through React's unmount so there is never a blank or a hard size jump. */
+.vx-menu-trigger[data-vx-menu-origin="closing"] .vx-menu-trigger__content {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.1s ease 0.26s,
+    transform 0.24s cubic-bezier(0.25, 0.8, 0.3, 1) 0.26s;
+}
+
+/* Trigger icons (e.g. a Button endIcon) live outside the ghost's wrapper, so
+   they play their re-entrance the INSTANT the panel unmounts ("landed"):
+   slide + blur -> sharp, the morph's motion language, fully visible. */
+.vx-menu-trigger[data-vx-menu-origin="hidden"] .vx-button__icon,
+.vx-menu-trigger[data-vx-menu-origin="closing"] .vx-button__icon {
+  opacity: 0;
+}
+
+.vx-menu-trigger[data-vx-menu-origin="landed"] .vx-button__icon {
+  animation: vx-menu-icon-enter 0.3s cubic-bezier(0.25, 0.8, 0.3, 1) both;
+}
+
+@keyframes vx-menu-icon-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-5px) scale(0.7);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: blur(0);
+  }
+}
+
+.vx-menu-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Counter-scaled about its own center; the runner animates it so it lands at
+   the content's natural size exactly where the real trigger content sits. */
+.vx-menu-ghost__inner {
+  display: inline-flex;
+  opacity: 0;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-menu-trigger__content {
+    transition: none;
+  }
+
+  .vx-menu-trigger[data-vx-menu-origin="landed"] .vx-button__icon {
+    animation: none;
+  }
+}
+
+/* Context-menu pressable area: long-press must summon OUR menu, not the
+   iOS callout or a text selection. */
+.vx-context-trigger {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Point-bloom return (ContextMenu): there is no trigger to reveal, so the
+   CONTENT stays aboard — dimmed and lightly blurred — and visibly crushes
+   into the point with the shrinking body. */
+[data-vx-menu][data-vx-point-bloom][data-vx-phase="closing"] > :not(.vx-menu-ghost) {
+  opacity: 0.55 !important;
+  filter: blur(1.5px) !important;
+  transition:
+    opacity 0.24s ease,
+    filter 0.24s ease !important;
+}

@@ -1,0 +1,113 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Liquid flow — the animated background of the first screen.
+
+   Fine stripes pushed through a turbulence field, which is what turns a
+   barcode into marble. Two of them with different seeds, periods and angles,
+   drifting at unrelated speeds and combined with `lighten`: the ribbons of
+   one cross the ribbons of the other somewhere new at every moment, so the
+   material keeps rearranging itself instead of sliding past like a poster.
+
+   Where the turbulence lives is a measured decision, not a stylistic one.
+   Timed in Chromium at 1280x800:
+
+     empty page, no effect ............................. 16.7ms  (60fps)
+     stripes animated under a live filter .............. 50.0ms  (20fps)
+     live-filtered layers moved by transform .......... 233.0ms  ( 4fps)
+     filter baked into an SVG, layers moved ........... (this)
+
+   A `filter` on the element is re-evaluated whenever that element is
+   repainted OR transformed, so every version that actually moved paid for
+   the noise again on every frame. Baking the same filter inside an SVG and
+   using it as a mask makes it a resource: rasterised once at load, then a
+   plain bitmap the compositor can translate for free. Same picture, same
+   motion, none of the per-frame cost.
+
+   Colour deliberately stays out of the SVG and comes from --flow-ribbon
+   here, so the two files are geometry only and the hero stays themeable.
+
+   No JavaScript, no canvas: two masks and two CSS transforms.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.flow {
+  position: absolute;
+  /* The layers drift, and the displacement inside the mask drags pixels
+     inward from beyond its edges. Without slack, both would expose bare
+     corners. */
+  inset: -30%;
+  z-index: 0;
+  background-color: var(--flow-ribbon);
+  mask-image: url("/liquid-a.svg");
+  mask-size: cover;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  animation: flow-a 71s linear infinite alternate;
+  /* Keeps the masked result on its own compositor layer, so the transform
+     below moves a texture instead of forcing a re-raster. */
+  will-change: transform;
+  pointer-events: none;
+}
+
+.flow--b {
+  mask-image: url("/liquid-b.svg");
+  /* Ribbons add where they cross and vanish where they do not, so the pair
+     reads as one material rather than two sheets of wallpaper. */
+  mix-blend-mode: lighten;
+  /* Deliberately unrelated to the other period: the two never return to the
+     same arrangement, so the pattern has no visible loop. */
+  animation: flow-b 97s linear infinite alternate;
+}
+
+/* On the light stage the ribbons are DARKER than the void, so "keep the
+   lighter pixel" would erase layer B wherever the pale ground shows through
+   layer A. Darken is the same crossing trick with the axis flipped. */
+[data-vx-mode="light"] .flow--b {
+  mix-blend-mode: darken;
+}
+
+/* Translation only. Rotating or scaling a masked layer asks the browser to
+   re-rasterise the mask at a new geometry, which hands back the per-frame
+   cost this whole approach exists to avoid. */
+@keyframes flow-a {
+  from {
+    transform: translate3d(-7%, -5%, 0);
+  }
+
+  to {
+    transform: translate3d(7%, 6%, 0);
+  }
+}
+
+@keyframes flow-b {
+  from {
+    transform: translate3d(6%, 4%, 0);
+  }
+
+  to {
+    transform: translate3d(-8%, -6%, 0);
+  }
+}
+
+/* Ambient motion: nothing is communicated by the drift, so it stops. The
+   marble stays, because the texture is composition rather than animation and
+   the headline still needs its background. */
+@media (prefers-reduced-motion: reduce) {
+  .flow {
+    animation: none;
+  }
+}
+
+/* Without the mask the layers would be flat rectangles of solid grey, which
+   is worse than no effect at all. */
+@supports not (mask-image: url("/liquid-a.svg")) {
+  .flow {
+    background-color: transparent;
+  }
+}
+
+/* The marble holds its breath while the mode wave crosses (the rule lives
+   here because .flow is the landing's, not the kit's): the wave's "new"
+   side is a live capture, and the drift would force full-page repaints
+   under every frame of the journey. */
+:root[data-vx-wave] .flow {
+  animation-play-state: paused;
+}

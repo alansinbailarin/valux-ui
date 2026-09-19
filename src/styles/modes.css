@@ -1,0 +1,165 @@
+/* Dark palette — single source of truth for every literal dark value.
+   [data-vx-mode="dark"] (explicit) and the @media system-dark block below
+   both consume these via var() instead of re-declaring hex/color-mix
+   literals, so the two selectors can never drift apart again (see
+   src/theme/modes-dark-tokens.test.ts, which asserts they set the same
+   token NAMES). Defined unconditionally on :root — inert until referenced. */
+:root {
+  --vx-dark-color-primary: #f4f4f5;
+  --vx-dark-color-primary-solid: #f4f4f5;
+  --vx-dark-color-on-primary: #18181b;
+  --vx-dark-color-primary-foreground: color-mix(
+    in srgb,
+    #f4f4f5 55%,
+    #ffffff
+  );
+  --vx-dark-color-surface-base: #09090b;
+  --vx-dark-color-surface-raised-base: #18181b;
+  --vx-dark-color-on-surface: #fafafa;
+  --vx-dark-color-focus: #60a5fa;
+  --vx-dark-color-danger: #f87171;
+  --vx-dark-color-danger-solid: #b91c1c;
+  --vx-dark-color-on-danger: #ffffff;
+  --vx-dark-color-danger-foreground: #fca5a5;
+  --vx-dark-color-success: #4ade80;
+  --vx-dark-color-success-solid: #15803d;
+  --vx-dark-color-on-success: #ffffff;
+  --vx-dark-color-success-foreground: #86efac;
+  --vx-dark-color-warning: #fbbf24;
+  --vx-dark-color-warning-solid: #f59e0b;
+  --vx-dark-color-on-warning: #451a03;
+  --vx-dark-color-warning-foreground: #fcd34d;
+  --vx-dark-color-info: #60a5fa;
+  --vx-dark-color-info-solid: #1d4ed8;
+  --vx-dark-color-on-info: #ffffff;
+  --vx-dark-color-info-foreground: #93c5fd;
+  /* Overlays (--vx-surface-3) ride ON the raised plane in dark and take a
+     stronger primary wash — the page is already near-black, so a panel has
+     to get lighter to read as "above". */
+  --vx-dark-surface-overlay-lift: 100%;
+  --vx-dark-surface-overlay-tint: 6%;
+  --vx-dark-card-border-alpha: 22%;
+  /* No hairline on elevated/soft in dark: the raised fill plus the inset top
+     highlight already separate them, and an extra edge reads as a box. */
+  --vx-dark-card-raised-border-alpha: 0%;
+  --vx-dark-card-elevated-lift: 100%;
+  --vx-dark-card-subtle-alpha: 6%;
+  --vx-dark-card-shadow:
+    inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent),
+    0 1px 2px rgb(0 0 0 / 0.35);
+}
+
+[data-vx-mode="light"],
+[data-vx-mode="system"] {
+  color-scheme: light;
+  --vx-color-primary: #171717;
+  --vx-color-primary-solid: #171717;
+  --vx-color-on-primary: #ffffff;
+  --vx-color-primary-foreground: var(--vx-color-primary);
+  --vx-color-surface-base: #ffffff;
+  --vx-color-surface-raised-base: #f4f4f5;
+  --vx-color-on-surface: #171717;
+  --vx-color-focus: #2563eb;
+  --vx-color-danger: #dc2626;
+  --vx-color-danger-solid: #dc2626;
+  --vx-color-on-danger: #ffffff;
+  --vx-color-danger-foreground: #b91c1c;
+  --vx-color-success: #16a34a;
+  --vx-color-success-solid: #15803d;
+  --vx-color-on-success: #ffffff;
+  --vx-color-success-foreground: #15803d;
+  --vx-color-warning: #d97706;
+  --vx-color-warning-solid: #f59e0b;
+  --vx-color-on-warning: #451a03;
+  --vx-color-warning-foreground: #b45309;
+  --vx-color-info: #2563eb;
+  --vx-color-info-solid: #2563eb;
+  --vx-color-on-info: #ffffff;
+  --vx-color-info-foreground: #1d4ed8;
+  --vx-surface-overlay-lift: 0%;
+  --vx-surface-overlay-tint: 2.5%;
+  --vx-card-border-alpha: 15%;
+  --vx-card-raised-border-alpha: 15%;
+  --vx-card-elevated-lift: 0%;
+  --vx-card-subtle-alpha: 4%;
+  --vx-card-shadow: 0 1px 3px rgb(0 0 0 / 0.06), 0 4px 16px rgb(0 0 0 / 0.1);
+}
+
+[data-vx-mode="dark"] {
+  color-scheme: dark;
+  --vx-color-primary: var(--vx-dark-color-primary);
+  --vx-color-primary-solid: var(--vx-dark-color-primary-solid);
+  --vx-color-on-primary: var(--vx-dark-color-on-primary);
+  --vx-color-primary-foreground: var(--vx-dark-color-primary-foreground);
+  --vx-color-surface-base: var(--vx-dark-color-surface-base);
+  --vx-color-surface-raised-base: var(--vx-dark-color-surface-raised-base);
+  --vx-color-on-surface: var(--vx-dark-color-on-surface);
+  --vx-color-focus: var(--vx-dark-color-focus);
+  --vx-color-danger: var(--vx-dark-color-danger);
+  --vx-color-danger-solid: var(--vx-dark-color-danger-solid);
+  --vx-color-on-danger: var(--vx-dark-color-on-danger);
+  --vx-color-danger-foreground: var(--vx-dark-color-danger-foreground);
+  --vx-color-success: var(--vx-dark-color-success);
+  --vx-color-success-solid: var(--vx-dark-color-success-solid);
+  --vx-color-on-success: var(--vx-dark-color-on-success);
+  --vx-color-success-foreground: var(--vx-dark-color-success-foreground);
+  --vx-color-warning: var(--vx-dark-color-warning);
+  --vx-color-warning-solid: var(--vx-dark-color-warning-solid);
+  --vx-color-on-warning: var(--vx-dark-color-on-warning);
+  --vx-color-warning-foreground: var(--vx-dark-color-warning-foreground);
+  --vx-color-info: var(--vx-dark-color-info);
+  --vx-color-info-solid: var(--vx-dark-color-info-solid);
+  --vx-color-on-info: var(--vx-dark-color-on-info);
+  --vx-color-info-foreground: var(--vx-dark-color-info-foreground);
+  --vx-surface-overlay-lift: var(--vx-dark-surface-overlay-lift);
+  --vx-surface-overlay-tint: var(--vx-dark-surface-overlay-tint);
+  --vx-card-border-alpha: var(--vx-dark-card-border-alpha);
+  --vx-card-raised-border-alpha: var(--vx-dark-card-raised-border-alpha);
+  --vx-card-elevated-lift: var(--vx-dark-card-elevated-lift);
+  --vx-card-subtle-alpha: var(--vx-dark-card-subtle-alpha);
+  --vx-card-shadow: var(--vx-dark-card-shadow);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* :where() gates the match without touching specificity: a bare `:root`
+     here matched <html> even when it carried an explicit data-vx-mode="light",
+     and — being equal specificity (0,1,0) but later in the file — beat the
+     light block on every dark-OS machine. Root-level mode forcing (the
+     no-FOUC pattern) could never reach light. The guard steps aside for
+     explicit light; explicit dark agrees with these values anyway. */
+  :root:where(:not([data-vx-mode="light"])),
+  [data-vx-mode="system"] {
+    color-scheme: dark;
+    --vx-color-primary: var(--vx-dark-color-primary);
+    --vx-color-primary-solid: var(--vx-dark-color-primary-solid);
+    --vx-color-on-primary: var(--vx-dark-color-on-primary);
+    --vx-color-primary-foreground: var(--vx-dark-color-primary-foreground);
+    --vx-color-surface-base: var(--vx-dark-color-surface-base);
+    --vx-color-surface-raised-base: var(--vx-dark-color-surface-raised-base);
+    --vx-color-on-surface: var(--vx-dark-color-on-surface);
+    --vx-color-focus: var(--vx-dark-color-focus);
+    --vx-color-danger: var(--vx-dark-color-danger);
+    --vx-color-danger-solid: var(--vx-dark-color-danger-solid);
+    --vx-color-on-danger: var(--vx-dark-color-on-danger);
+    --vx-color-danger-foreground: var(--vx-dark-color-danger-foreground);
+    --vx-color-success: var(--vx-dark-color-success);
+    --vx-color-success-solid: var(--vx-dark-color-success-solid);
+    --vx-color-on-success: var(--vx-dark-color-on-success);
+    --vx-color-success-foreground: var(--vx-dark-color-success-foreground);
+    --vx-color-warning: var(--vx-dark-color-warning);
+    --vx-color-warning-solid: var(--vx-dark-color-warning-solid);
+    --vx-color-on-warning: var(--vx-dark-color-on-warning);
+    --vx-color-warning-foreground: var(--vx-dark-color-warning-foreground);
+    --vx-color-info: var(--vx-dark-color-info);
+    --vx-color-info-solid: var(--vx-dark-color-info-solid);
+    --vx-color-on-info: var(--vx-dark-color-on-info);
+    --vx-color-info-foreground: var(--vx-dark-color-info-foreground);
+    --vx-surface-overlay-lift: var(--vx-dark-surface-overlay-lift);
+    --vx-surface-overlay-tint: var(--vx-dark-surface-overlay-tint);
+    --vx-card-border-alpha: var(--vx-dark-card-border-alpha);
+    --vx-card-raised-border-alpha: var(--vx-dark-card-raised-border-alpha);
+    --vx-card-elevated-lift: var(--vx-dark-card-elevated-lift);
+    --vx-card-subtle-alpha: var(--vx-dark-card-subtle-alpha);
+    --vx-card-shadow: var(--vx-dark-card-shadow);
+  }
+}

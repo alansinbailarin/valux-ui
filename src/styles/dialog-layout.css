@@ -1,0 +1,153 @@
+/* Structural parts shared by Dialog and Sheet: Header (pinned), Body (the
+   one scroll region), Footer (action row), Icon (tinted badge). When a Body
+   is present the PANEL stops scrolling and becomes a column — title, X, and
+   footer stay put. (:has() unsupported -> graceful whole-panel scroll.) */
+[data-vx-dialog]:has(.vx-dialog__body),
+[data-vx-sheet]:has(.vx-sheet__body) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.vx-dialog__body,
+.vx-sheet__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.vx-dialog__header,
+.vx-sheet__header {
+  flex: 0 0 auto;
+}
+
+.vx-dialog__footer,
+.vx-sheet__footer,
+.vx-drawer__footer {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* Narrow screens: native-style stacked actions, primary on top. */
+@media (max-width: 480px) {
+  .vx-dialog__footer,
+  .vx-sheet__footer,
+.vx-drawer__footer {
+    flex-direction: column-reverse;
+  }
+
+  .vx-dialog__footer > *,
+  .vx-sheet__footer,
+.vx-drawer__footer > * {
+    width: 100%;
+  }
+}
+
+/* Tinted icon badge above the title. */
+.vx-dialog__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.75rem;
+  border-radius: 999px; /* fully circular badge */
+  background: color-mix(in srgb, var(--vx-icon-tone) 12%, transparent);
+  color: var(--vx-icon-tone-foreground);
+}
+
+.vx-dialog__icon > svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.vx-dialog__icon[data-vx-tone="primary"] {
+  --vx-icon-tone: var(--vx-color-primary-solid);
+  --vx-icon-tone-foreground: var(--vx-color-primary-foreground);
+}
+
+.vx-dialog__icon[data-vx-tone="danger"] {
+  --vx-icon-tone: var(--vx-color-danger-solid);
+  --vx-icon-tone-foreground: var(--vx-color-danger-foreground);
+}
+
+.vx-dialog__icon[data-vx-tone="success"] {
+  --vx-icon-tone: var(--vx-color-success-solid);
+  --vx-icon-tone-foreground: var(--vx-color-success-foreground);
+}
+
+.vx-dialog__icon[data-vx-tone="warning"] {
+  --vx-icon-tone: var(--vx-color-warning-solid);
+  --vx-icon-tone-foreground: var(--vx-color-warning-foreground);
+}
+
+.vx-dialog__icon[data-vx-tone="info"] {
+  --vx-icon-tone: var(--vx-color-info-solid);
+  --vx-icon-tone-foreground: var(--vx-color-info-foreground);
+}
+
+.vx-dialog__icon[data-vx-tone="neutral"] {
+  --vx-icon-tone: var(--vx-color-on-surface);
+  --vx-icon-tone-foreground: var(--vx-color-on-surface);
+}
+
+/* Progressive top fog for scrolled bodies: a sticky strip that blurs the
+   content sliding beneath it, fading downward. Hidden at the very top. */
+.vx-dialog__fog,
+.vx-sheet__fog {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 1.75rem;
+  margin-bottom: -1.75rem;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.18s ease;
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+[data-vx-scrolled] > .vx-dialog__fog,
+[data-vx-scrolled] > .vx-sheet__fog {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-dialog__fog,
+  .vx-sheet__fog {
+    transition: none;
+  }
+}
+
+/* Drawer reuses the pinned-chrome scroll region of the family. */
+.vx-drawer__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -0.5rem;
+  padding: 0 0.5rem;
+}
+
+.vx-drawer__fog {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 1.5rem;
+  margin-bottom: -1.5rem;
+  pointer-events: none;
+  opacity: 0;
+  background: linear-gradient(var(--vx-dialog-surface), transparent);
+  transition: opacity 0.2s ease;
+}
+
+[data-vx-scrolled] > .vx-drawer__fog {
+  opacity: 1;
+}

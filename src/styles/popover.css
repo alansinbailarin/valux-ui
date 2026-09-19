@@ -1,0 +1,109 @@
+/* The Popover shares the Menu's glass material and rounding (same tokens,
+   same surface adoption) with free-form padded content. */
+[data-vx-popover] {
+  z-index: var(--vx-menu-z);
+  width: max-content;
+  max-width: min(92vw, 22rem);
+  max-height: var(--vx-menu-max-height);
+  padding: 1rem 1.125rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid
+    color-mix(in srgb, var(--vx-color-on-surface), transparent 92%);
+  border-radius: var(--vx-menu-radius);
+  background: var(--vx-menu-surface);
+  -webkit-backdrop-filter: var(--vx-menu-backdrop);
+  backdrop-filter: var(--vx-menu-backdrop);
+  color: var(--vx-color-on-surface);
+  box-shadow: inset 0 -1px 0 var(--vx-menu-lowlight);
+  font-family: var(--vx-font-family);
+  font-size: 0.8125rem;
+}
+
+/* Layer promotion while morphing (see dialog-content.css). */
+[data-vx-popover][data-vx-phase="opening"],
+[data-vx-popover][data-vx-phase="closing"] {
+  will-change: transform, filter;
+}
+
+/* While closing, the ghost is the story — content bows out fast. */
+[data-vx-popover][data-vx-phase="closing"] > :not(.vx-popover-ghost) {
+  opacity: 0;
+  filter: blur(6px);
+  transition:
+    opacity 0.16s ease,
+    filter 0.16s ease;
+}
+
+/* Trigger origin states — same choreography contract as menu/dialog. */
+.vx-popover-trigger[data-vx-morph-origin="hidden"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.vx-popover-trigger[data-vx-morph-origin="closing"] {
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.1s ease 0.24s;
+}
+
+.vx-popover-trigger__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(1);
+  transition: transform 0.24s cubic-bezier(0.25, 0.8, 0.3, 1);
+}
+
+.vx-popover-trigger__content > svg {
+  width: 1.375em;
+  height: 1.375em;
+}
+
+.vx-popover-trigger[data-vx-morph-origin="hidden"] .vx-popover-trigger__content {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: none;
+}
+
+.vx-popover-trigger[data-vx-morph-origin="closing"] .vx-popover-trigger__content {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.1s ease 0.26s,
+    transform 0.24s cubic-bezier(0.25, 0.8, 0.3, 1) 0.26s;
+}
+
+.vx-popover-trigger[data-vx-morph-origin="hidden"] .vx-button__icon,
+.vx-popover-trigger[data-vx-morph-origin="closing"] .vx-button__icon {
+  opacity: 0;
+}
+
+.vx-popover-trigger[data-vx-morph-origin="landed"] .vx-button__icon {
+  animation: vx-menu-icon-enter 0.3s cubic-bezier(0.25, 0.8, 0.3, 1) both;
+}
+
+.vx-popover-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.vx-popover-ghost__inner {
+  display: inline-flex;
+  opacity: 0;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-popover-trigger__content {
+    transition: none;
+  }
+
+  .vx-popover-trigger[data-vx-morph-origin="landed"] .vx-button__icon {
+    animation: none;
+  }
+}

@@ -1,0 +1,112 @@
+[data-vx-dialog] {
+  z-index: var(--vx-dialog-z);
+  width: max-content;
+  max-width: var(--vx-dialog-max-inline);
+  max-height: var(--vx-dialog-max-block);
+  padding: var(--vx-dialog-padding);
+  overflow-x: hidden;
+  overflow-y: auto;
+  border: 1px solid
+    color-mix(in srgb, var(--vx-color-on-surface), transparent 92%);
+  border-radius: var(--vx-dialog-radius);
+  background: var(--vx-dialog-surface);
+  -webkit-backdrop-filter: var(--vx-dialog-backdrop);
+  backdrop-filter: var(--vx-dialog-backdrop);
+  color: var(--vx-color-on-surface);
+  box-shadow: inset 0 -1px 0 var(--vx-dialog-lowlight);
+  font-family: var(--vx-font-family);
+}
+
+/* While closing, the ghost is the story: the real content bows out fast with
+   a soft blur so it never doubles up against the traveling trigger content. */
+/* Layer promotion while morphing: the panel rasterizes once and the scale
+   becomes GPU sampling instead of a per-frame repaint of its content. */
+[data-vx-dialog][data-vx-phase="opening"],
+[data-vx-dialog][data-vx-phase="closing"] {
+  will-change: transform, filter;
+}
+
+[data-vx-dialog][data-vx-phase="closing"] > :not(.vx-dialog-ghost) {
+  opacity: 0;
+  filter: blur(6px);
+  transition:
+    opacity 0.16s ease,
+    filter 0.16s ease;
+}
+
+/* Trigger origin states — same choreography contract as the menu trigger. */
+.vx-dialog-trigger[data-vx-morph-origin="hidden"] {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Reveal as the traveling body lands (82% of the 460ms close): the panel may
+   arrive from across the viewport, so an early reveal would show two bodies. */
+.vx-dialog-trigger[data-vx-morph-origin="closing"] {
+  opacity: 1;
+  pointer-events: none;
+  transition: opacity 0.1s ease 0.3s;
+}
+
+.vx-dialog-trigger__content {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(1);
+  transition: transform 0.24s cubic-bezier(0.25, 0.8, 0.3, 1);
+}
+
+.vx-dialog-trigger__content > svg {
+  width: 1.375em;
+  height: 1.375em;
+}
+
+.vx-dialog-trigger[data-vx-morph-origin="hidden"] .vx-dialog-trigger__content {
+  opacity: 0;
+  transform: scale(0.95);
+  transition: none;
+}
+
+.vx-dialog-trigger[data-vx-morph-origin="closing"] .vx-dialog-trigger__content {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity 0.1s ease 0.32s,
+    transform 0.24s cubic-bezier(0.25, 0.8, 0.3, 1) 0.32s;
+}
+
+.vx-dialog-trigger[data-vx-morph-origin="hidden"] .vx-button__icon,
+.vx-dialog-trigger[data-vx-morph-origin="closing"] .vx-button__icon {
+  opacity: 0;
+}
+
+/* Icons re-enter the instant the panel unmounts, reusing the menu's
+   entrance keyframes (same motion language, one definition). */
+.vx-dialog-trigger[data-vx-morph-origin="landed"] .vx-button__icon {
+  animation: vx-menu-icon-enter 0.3s cubic-bezier(0.25, 0.8, 0.3, 1) both;
+}
+
+.vx-dialog-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.vx-dialog-ghost__inner {
+  display: inline-flex;
+  opacity: 0;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-dialog-trigger__content {
+    transition: none;
+  }
+
+  .vx-dialog-trigger[data-vx-morph-origin="landed"] .vx-button__icon {
+    animation: none;
+  }
+}

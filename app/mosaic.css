@@ -1,0 +1,94 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   The mosaic: a full-bleed grid wall under the hero.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.showcase {
+  /* A breath of margin, top and sides; the wall owns the rest. */
+  padding: clamp(1rem, 3vw, 2.25rem);
+  background: var(--vx-color-surface-base);
+  color: var(--vx-color-on-surface);
+}
+
+.mosaic {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1.125rem;
+}
+
+.mosaic > * {
+  break-inside: avoid;
+}
+
+/* Tile chrome belongs to the kit's Card — but the WALL tunes its plane. */
+.mosaic .vx-card {
+  background: light-dark(
+    color-mix(in srgb, var(--vx-color-on-surface) 5%, var(--vx-color-surface-base)),
+    color-mix(in srgb, var(--vx-color-on-surface) 8%, var(--vx-color-surface-base))
+  );
+  box-shadow: none;
+}
+
+/* Specimen tiles: the component floats alone, dead centre. The inert
+   wrapper (Mosaic.tsx) already kills hit-testing, hover, focus and clicks;
+   pointer-events is the belt for engines with partial inert support. */
+.mosaic__specimen {
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+}
+
+/* Wall station only: in the expanded canvas the same chip is live. */
+.mosaic .specimen-chip {
+  pointer-events: none;
+}
+
+/* Specimens centre in their display case. */
+.mosaic__specimen {
+  overflow: hidden;
+}
+
+.expand__canvas .specimen-chip {
+  pointer-events: auto;
+}
+
+/* Scroll reveal: each tile rises as it ENTERS the viewport, driven by its
+   own view() timeline — scrubbed by scroll, off the main thread, and
+   deterministic (a tile already past its entry range simply sits settled;
+   nothing is gated on the animation firing). Probed as supported in both
+   engines; elsewhere the guard leaves tiles plainly visible. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .mosaic > * {
+      animation: mosaic-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 55%;
+    }
+  }
+}
+
+@keyframes mosaic-rise {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+}
+
+/* The ContextMenu specimen's pressable pad. */
+.specimen-pad {
+  display: grid;
+  place-items: center;
+  
+  width: 13rem;
+  height: 8rem;
+  border: 1px dashed
+    color-mix(in srgb, var(--vx-color-on-surface), transparent 70%);
+  border-radius: var(--vx-radius-control);
+  font-size: 0.875rem;
+  color: color-mix(in srgb, var(--vx-color-on-surface), transparent 35%);
+}
+
+.specimen-chip {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}

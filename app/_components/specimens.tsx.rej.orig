@@ -1,0 +1,13 @@
+@@ -1,10 +1,12 @@
+ import { Button, Input, Select, Switch, TextArea } from "@/src";
+ 
+ import { BUTTON_SPECIMEN } from "./specimenButton";
++import { INPUT_SPECIMEN } from "./specimenInput";
+ import { RADIO_SPECIMEN } from "./specimenRadio";
+ import type { Specimen } from "./specimenTypes";
+ 
+ export const CONTROL_SPECIMENS: Specimen[] = [
+   { id: "button", name: "Button", ...BUTTON_SPECIMEN },
+   { id: "radio", name: "Radio", ...RADIO_SPECIMEN },
++  { id: "input", name: "Input", ...INPUT_SPECIMEN },
+   {

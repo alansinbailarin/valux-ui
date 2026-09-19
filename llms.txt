@@ -1,0 +1,37 @@
+# Valux UI
+
+> Accessible React components for modern Next.js applications with a
+> native-mobile feel: Button, Card, Menu, Popover, Tooltip, Dialog, Sheet,
+> Toast, Input, TextArea, Switch, Checkbox, Radio, Select, ContextMenu,
+> Drawer, and SwiftUI-style Hero view transitions between pages. One theme, ONE pronounced radius, one motion signature (panels
+> morph out of their triggers). Zero runtime dependencies, TypeScript,
+> ESM + CJS. Install: `pnpm add @valux/ui`.
+
+Key conventions: dialogs dismiss ONLY via the built-in X (never add Cancel
+buttons); there is no radius prop anywhere; Sheet is a separate component,
+not a Dialog variant; toasts queue one at a time behind a single Toaster.
+
+## Docs
+
+- [Getting started](docs/getting-started.md): install, root setup, first components, kit conventions
+- [ValuxProvider](docs/components/provider.md): theme (mode, primary color, density, font), nesting
+- [Button](docs/components/button.md): colors, variants, sizes, icons, loading, asChild
+- [Card](docs/components/card.md): composable surface, variants (outline/elevated/soft), Media/Header/Title/Subtitle/Body/Footer
+- [Menu](docs/components/menu.md): trigger morph, items, shortcuts, destructive items
+- [Popover](docs/components/popover.md): non-modal anchored panel
+- [Tooltip](docs/components/tooltip.md): delay/warm groups, rich content, placements
+- [Dialog](docs/components/dialog.md): sizes, placement, Header/Body/Footer, Icon, alert, nesting
+- [Sheet](docs/components/sheet.md): floating bottom sheet, detents, expandable, pull to close
+- [Drawer](docs/components/drawer.md): floating side panel, left/right, sizes, pull sideways to close
+- [Toast](docs/components/toast.md): toast(), queueing rules, toast.promise, positions
+- [Input & TextArea](docs/components/input.md): curated types, variants, sizes, validation, counter
+- [Switch](docs/components/switch.md): native-feel toggle, drag to commit, sizes, settings rows
+- [Checkbox & Radio](docs/components/checkbox.md): drawn checkmark, indeterminate, RadioGroup with popping dot
+- [Select](docs/components/select.md): Input-look trigger, morphing listbox panel, combobox filter, keyboard
+- [Context menu](docs/components/context-menu.md): right-click / long-press Menu at the pointer
+- [View transitions](docs/components/view-transitions.md): Hero shared elements between pages, presets, same-page morphs
+- [Motion](docs/motion.md): the morph signature, gestures, reduced motion
+
+## Optional
+
+- [Full documentation in one file](llms-full.txt)

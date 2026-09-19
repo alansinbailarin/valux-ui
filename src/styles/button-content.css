@@ -1,0 +1,80 @@
+.vx-button[data-vx-icon-only] {
+  width: var(--vx-control-height);
+  min-width: var(--vx-control-height);
+  padding-inline: 0;
+}
+
+.vx-button[data-vx-full-width] {
+  width: 100%;
+}
+
+.vx-button__body {
+  display: inline-grid;
+  align-items: center;
+  justify-items: center;
+}
+
+.vx-button__content,
+.vx-button__loading {
+  grid-area: 1 / 1;
+}
+
+.vx-button__content {
+  gap: var(--vx-button-icon-gap);
+}
+
+.vx-button__icon {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.vx-button__icon > svg {
+  width: 1.25em;
+  height: 1.25em;
+}
+
+.vx-button[data-vx-icon-only] .vx-button__content > svg {
+  width: 1.375em;
+  height: 1.375em;
+}
+
+.vx-button__loading {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--vx-control-gap);
+  white-space: nowrap;
+}
+
+.vx-button__loading-text {
+  display: inline-flex;
+  align-items: center;
+}
+
+.vx-button__spinner {
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+  border: 2px solid color-mix(in srgb, currentcolor, transparent 68%);
+  border-top-color: currentcolor;
+  border-radius: 50%;
+  animation: vx-button-spin 700ms linear infinite;
+}
+
+.vx-button[data-vx-loading] .vx-button__content {
+  opacity: 0;
+}
+
+@keyframes vx-button-spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-button__spinner {
+    animation: none;
+  }
+}

@@ -1,0 +1,24 @@
+@@ -2,16 +2,20 @@
+ 
+ import { BUTTON_SPECIMEN } from "./specimenButton";
+ import { INPUT_SPECIMEN } from "./specimenInput";
++import { TOOLTIP_SPECIMEN } from "./specimenTooltip";
++import { CARD_SPECIMEN } from "./specimenCard";
++import { SWITCH_SPECIMEN } from "./specimenSwitch";
+ import { RADIO_SPECIMEN } from "./specimenRadio";
+ import type { Specimen } from "./specimenTypes";
+ 
+ export const CONTROL_SPECIMENS: Specimen[] = [
+   BUTTON_SPECIMEN,
+   RADIO_SPECIMEN,
+   INPUT_SPECIMEN,
+-
+-  { id: "switch", label: "Switch", height: 180, node: <Switch label="Notifications" defaultChecked /> },
+-  { id: "checkbox", label: "Checkbox", height: 180, node: <Checkbox label="Remember me" defaultChecked /> },
++  TOOLTIP_SPECIMEN,
++  CARD_SPECIMEN,
++  SWITCH_SPECIMEN,
++  { id: "checkbox", label: "Checkbox", height: 180, node: <Checkbox label="Remember me" defaultChecked /> },
+   {
+     id: "textarea",
+ 

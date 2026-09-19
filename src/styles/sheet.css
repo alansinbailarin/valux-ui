@@ -1,0 +1,189 @@
+/* The Sheet shares the dialog's material (surface, scrim, blur, radius) but
+   NOT its choreography: it slides up from the bottom edge and slides — or is
+   dragged — back down. */
+[data-vx-sheet-scrim] {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--vx-dialog-z) - 1);
+  background: var(--vx-dialog-scrim);
+  -webkit-backdrop-filter: var(--vx-dialog-scrim-backdrop);
+  backdrop-filter: var(--vx-dialog-scrim-backdrop);
+  opacity: 0;
+  pointer-events: none;
+}
+
+[data-vx-sheet-scrim][data-vx-phase="opening"] {
+  animation: vx-dialog-scrim-in 0.3s ease 0.05s both;
+}
+
+[data-vx-sheet-scrim][data-vx-phase="open"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+[data-vx-sheet-scrim][data-vx-phase="closing"] {
+  animation: vx-dialog-scrim-out 0.24s ease both;
+}
+
+[data-vx-sheet] {
+  /* FLOATING sheet: it rises from the bottom but stays DETACHED from the
+     screen edges — an outer gutter all around (safe-area aware), with the
+     full panel radius on every corner. */
+  --vx-sheet-gutter: 0.625rem;
+  position: fixed;
+  left: max(var(--vx-sheet-gutter), env(safe-area-inset-left));
+  right: max(var(--vx-sheet-gutter), env(safe-area-inset-right));
+  bottom: max(var(--vx-sheet-gutter), env(safe-area-inset-bottom));
+  z-index: var(--vx-dialog-z);
+  max-height: min(85dvh, 44rem);
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 1rem 1.25rem;
+  padding-bottom: 1.25rem; /* the gutter already clears the safe area */
+  border: 1px solid
+    color-mix(in srgb, var(--vx-color-on-surface), transparent 92%);
+  border-radius: var(--vx-dialog-radius);
+  background: var(--vx-dialog-surface);
+  -webkit-backdrop-filter: var(--vx-dialog-backdrop);
+  backdrop-filter: var(--vx-dialog-backdrop);
+  color: var(--vx-color-on-surface);
+  font-family: var(--vx-font-family);
+}
+
+/* Height detents: auto hugs content; half/full are fixed stops. Content
+   keeps scrolling internally past the detent. */
+[data-vx-sheet][data-vx-height="half"] {
+  height: 50dvh;
+}
+
+[data-vx-sheet][data-vx-height="full"],
+[data-vx-sheet][data-vx-expanded] {
+  /* Fill the screen minus the floating gutters (and the notch). */
+  height: calc(
+    100dvh - var(--vx-sheet-gutter, 0.625rem) -
+      max(0.875rem, env(safe-area-inset-top))
+  );
+  max-height: none;
+}
+
+[data-vx-sheet][data-vx-phase="opening"],
+[data-vx-sheet][data-vx-phase="closing"] {
+  will-change: transform;
+}
+
+[data-vx-sheet][data-vx-phase="opening"] {
+  animation: vx-sheet-up 0.34s cubic-bezier(0.32, 0.72, 0.28, 1) both;
+}
+
+/* Gesture dismissals play their own WAAPI exit (data-vx-skip-morph). */
+[data-vx-sheet][data-vx-phase="closing"]:not([data-vx-skip-morph]) {
+  animation: vx-sheet-down 0.26s ease-in both;
+}
+
+[data-vx-sheet][data-vx-phase="closing"][data-vx-skip-morph] {
+  opacity: 0;
+}
+
+/* Glass values mirror --vx-dialog-backdrop (literal: iOS mis-resolves var()
+   inside keyframes). Off while moving — sliding a backdrop-filtered surface
+   re-samples the page every frame and drops mobile frame rates. */
+@keyframes vx-sheet-up {
+  from {
+    transform: translateY(calc(100% + 0.625rem));
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+  75% {
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+  to {
+    transform: translateY(0);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+}
+
+@keyframes vx-sheet-down {
+  from {
+    transform: translateY(0);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(24px) saturate(180%);
+  }
+  25% {
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+  to {
+    transform: translateY(calc(105% + 0.625rem));
+    -webkit-backdrop-filter: blur(0px) saturate(100%);
+    backdrop-filter: blur(0px) saturate(100%);
+  }
+}
+
+.vx-sheet__title {
+  margin: 0 0 0.25rem;
+  padding-right: 2.25rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.vx-sheet__description {
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+  color: color-mix(in srgb, currentcolor, transparent 30%);
+}
+
+.vx-sheet__x {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--vx-radius-control);
+  background: transparent;
+  color: inherit;
+  opacity: 0.55;
+  cursor: pointer;
+  transition:
+    opacity 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.vx-sheet__x:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--vx-color-on-surface), transparent 92%);
+}
+
+.vx-sheet__x:focus-visible {
+  outline: none;
+  opacity: 1;
+  box-shadow: inset 0 0 0 var(--vx-focus-width) var(--vx-color-focus);
+}
+
+.vx-sheet__x > svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-vx-sheet-scrim],
+  [data-vx-sheet] {
+    animation: none !important;
+  }
+
+  [data-vx-sheet-scrim][data-vx-phase="opening"] {
+    opacity: 1;
+  }
+
+  .vx-sheet__x {
+    transition: none;
+  }
+}

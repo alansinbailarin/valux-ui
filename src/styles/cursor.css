@@ -1,0 +1,125 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   The kit's cursor (activated by mounting <Cursor />; bare kit styles
+   never touch a consumer page's cursor — everything here is gated behind
+   the data-vx-cursor attribute the component manages): a rounded arrowhead, black body with a white
+   outline, pointing right — drawn as an inline SVG so there is nothing to
+   load and nothing to lag. `cursor: url()` is composited by the OS, not the
+   page: unlike a JS-driven fake cursor it costs zero main-thread work and
+   never trails behind the pointer, which matters on a page whose main
+   thread is deliberately busy being a spectacle.
+
+   The white stroke is what makes ONE cursor work on BOTH themes: body reads
+   on light, outline reads on dark. Interactive targets flip the fill —
+   white body, black outline — so hover feedback stays in the same family.
+
+   Hotspot: the arrow points right, so the click point is its TIP at
+   (27, 16) — the two bare numbers after the url(). Move the tip in the
+   path? Move these with it.
+
+   Uniformity is load-bearing, not cosmetic: hit-testing collapses to the
+   root during view transitions (the wave), and any difference between the
+   root cursor and an element cursor showed up as a flicker there. One
+   drawing everywhere = nothing to flicker. Keep the keyword fallbacks
+   (`auto` / `pointer`) LAST in each list: a browser that rejects the SVG
+   silently falls back to the native cursor instead of none at all.
+
+   32x32 is a hard ceiling, not a preference — Chromium ignores larger
+   cursors outright as anti-spoofing.
+   ───────────────────────────────────────────────────────────────────────── */
+
+:root[data-vx-cursor] {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 5 27 16 6 27 Q11 16 6 5 Z' fill='%23111113' stroke='%23ffffff' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      27 16,
+    auto;
+}
+
+/* Pressables: same arrow, inverted. Deliberately NOT the OS hand — the
+   whole point is that the pointer never changes shape, only dress. */
+:root[data-vx-cursor] :is(a, button, [role="button"], label, summary) {
+  cursor:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32'%3E%3Cpath d='M6 5 27 16 6 27 Q11 16 6 5 Z' fill='%23ffffff' stroke='%23111113' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E")
+      27 16,
+    pointer;
+}
+
+/* Text entry keeps the native I-beam: precision beats branding where the
+   user is aiming between letters. */
+:root[data-vx-cursor] :is(input, textarea, [contenteditable="true"]) {
+  cursor: text;
+}
+
+/* ── The live arrow ────────────────────────────────────────────────────────
+   PointerArrow.tsx drives this element for fine pointers without reduced
+   motion: same drawing as the static cursor above, but trailing the pointer
+   with easing and turning its tip toward the direction of travel. While it
+   is live, the real cursor hides EVERYWHERE — two arrows chasing each other
+   is worse than either alone. Universal + !important is deliberate: any
+   element-level cursor would poke a hole in the illusion. Revisit the
+   blanket when the landing grows real text inputs. */
+:root[data-vx-cursor="live"],
+:root[data-vx-cursor="live"] * {
+  cursor: none !important;
+}
+
+.vx-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* Above the orb (1300): the cursor outranks everything it points at. */
+  z-index: 1400;
+  opacity: 0;
+  transform-origin: 0 0;
+  /* Its own snapshot group: without a name it is captured INSIDE the root
+     pair during the mode wave — frozen in the old photo and clipped by the
+     reveal in the new one, so it would vanish over unrevealed regions while
+     the native cursor is hidden. Named, it rides ABOVE the wave, live. */
+  view-transition-name: vx-cursor;
+  will-change: transform;
+  pointer-events: none;
+}
+
+/* The live arrow dresses in the theme's ink: dark body on light pages,
+   light body on dark ones, each outlined in its opposite. The static
+   fallback above deliberately does NOT follow the mode — it exists for
+   no-JS and reduced-motion, where nothing re-reads the attribute, so it
+   wears the one design that stays legible on both themes. */
+:root {
+  --vx-cursor-ink: #111113;
+  --vx-cursor-edge: #ffffff;
+}
+
+:root[data-vx-mode="dark"] {
+  --vx-cursor-ink: #fafafa;
+  --vx-cursor-edge: #111113;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-vx-mode="light"])) {
+    --vx-cursor-ink: #fafafa;
+    --vx-cursor-edge: #111113;
+  }
+}
+
+.vx-cursor path {
+  fill: var(--vx-cursor-ink);
+  stroke: var(--vx-cursor-edge);
+  stroke-width: 3.5;
+  stroke-linejoin: round;
+  /* The dress change over pressables (and across the mode wave) glides
+     instead of snapping. */
+  transition: fill 160ms ease, stroke 160ms ease;
+}
+
+/* Over pressables the arrow inverts — feedback by dress, never by shape. */
+.vx-cursor--press path {
+  fill: var(--vx-cursor-edge);
+  stroke: var(--vx-cursor-ink);
+}
+
+/* The wave must not choreograph the cursor's group: left to the UA it would
+   ease the arrow from its captured position for the transition's opening
+   beat, detaching it from the hand. */
+:root[data-vx-wave]::view-transition-group(vx-cursor) {
+  animation: none;
+}

@@ -1,0 +1,455 @@
+/* Liquid tab-toasts: a goo-fused pill+panel silhouette that GENERATES itself
+   (the panel stretches out of the pill) and reabsorbs on exit. INVERTED vs
+   the theme (dark chip on light themes, light chip on dark) for maximum
+   contrast — every value derives from surface/on-surface, so it follows the
+   provider (and system mode) with no mode-specific blocks. Solid colors:
+   the goo threshold needs opaque shapes. */
+:root,
+[data-vx-provider] {
+  --vx-toast-surface: color-mix(in srgb, var(--vx-color-primary) 6%, var(--vx-color-on-surface));
+  --vx-toast-ink: var(--vx-color-surface);
+}
+
+[data-vx-toaster] {
+  position: fixed;
+  z-index: calc(var(--vx-menu-z) + 200);
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: min(92vw, 23rem);
+  pointer-events: none;
+  font-family: var(--vx-font-family);
+}
+
+[data-vx-toaster][data-vx-position="top"] {
+  top: max(1rem, env(safe-area-inset-top));
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+[data-vx-toaster][data-vx-position="top-left"] {
+  top: max(1rem, env(safe-area-inset-top));
+  left: 1rem;
+}
+
+[data-vx-toaster][data-vx-position="top-right"] {
+  top: max(1rem, env(safe-area-inset-top));
+  right: 1rem;
+}
+
+[data-vx-toaster][data-vx-position="bottom"] {
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column-reverse;
+}
+
+[data-vx-toaster][data-vx-position="bottom-left"] {
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  left: 1rem;
+  flex-direction: column-reverse;
+}
+
+[data-vx-toaster][data-vx-position="bottom-right"] {
+  bottom: max(1rem, env(safe-area-inset-bottom));
+  right: 1rem;
+  flex-direction: column-reverse;
+}
+
+.vx-toast-slot {
+  position: relative;
+}
+
+.vx-toast {
+  position: relative;
+  pointer-events: auto;
+  cursor: default;
+  touch-action: pan-y;
+}
+
+/* Queued toasts stack behind the stage card as COMPLETE cards (text,
+   icon, everything) — real toasts waiting their turn. On promotion the
+   same element just slides to the front: transform releases to none and
+   the transition carries it. */
+.vx-toast[data-vx-peek] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: -1;
+  pointer-events: none;
+  transform: translateY(16px) scale(0.96);
+  opacity: 0.75;
+  /* Fade in AFTER the stage card forms; filter (not opacity/transform)
+     so the fill never blocks the transitions below. */
+  animation: vx-toast-peek-in 0.3s ease 0.45s backwards;
+}
+
+.vx-toast[data-vx-peek="2"] {
+  z-index: -2;
+  transform: translateY(30px) scale(0.92);
+  opacity: 0.45;
+}
+
+[data-vx-position^="bottom"] .vx-toast[data-vx-peek] {
+  transform: translateY(-16px) scale(0.96);
+}
+
+[data-vx-position^="bottom"] .vx-toast[data-vx-peek="2"] {
+  transform: translateY(-30px) scale(0.92);
+}
+
+/* Rank glides and the pass-to-front slide share one transition. The
+   attribute is present on both sides of every change (peek 2 -> 1, and
+   peek -> promoted), so it always applies. */
+.vx-toast[data-vx-peek],
+.vx-toast[data-vx-phase="promoted"] {
+  transition:
+    transform 0.38s cubic-bezier(0.3, 1.05, 0.4, 1),
+    opacity 0.3s ease;
+}
+
+/* Frozen mid-silhouette: peeks show settled shapes, never entrance frames. */
+.vx-toast[data-vx-phase="peek"] .vx-toast__pill,
+.vx-toast[data-vx-phase="peek"] .vx-toast__panel,
+.vx-toast[data-vx-phase="peek"] .vx-toast__ink .vx-toast__panel > *,
+.vx-toast[data-vx-phase="promoted"] .vx-toast__pill,
+.vx-toast[data-vx-phase="promoted"] .vx-toast__panel,
+.vx-toast[data-vx-phase="promoted"] .vx-toast__ink .vx-toast__panel > * {
+  animation: none;
+}
+
+@keyframes vx-toast-peek-in {
+  from {
+    filter: opacity(0);
+  }
+}
+
+.vx-toast__goo {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  /* The drop-shadows trace the FUSED silhouette: a hairline rim (light in
+     dark mode, dark in light) plus soft elevation — a normal border cannot
+     follow a goo shape. */
+  filter: url("#vx-toast-goo")
+    drop-shadow(0 0 1px color-mix(in srgb, var(--vx-color-on-surface), transparent 45%))
+    drop-shadow(0 8px 22px rgba(0, 0, 0, 0.28));
+}
+
+.vx-toast__goo .vx-toast__pill,
+.vx-toast__goo .vx-toast__panel {
+  background: var(--vx-toast-surface);
+}
+
+.vx-toast__goo .vx-toast__pill > *,
+.vx-toast__goo .vx-toast__panel > * {
+  visibility: hidden; /* sizing twins — ink lives on the layer above */
+}
+
+.vx-toast__ink {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.vx-toast__pill {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto -0.875rem;
+  padding: 0.625rem 1.125rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+/* Anchored sides are FLUSH AND STRAIGHT: the pill squares its corners on
+   that side (a stadium cap against the panel edge read as a bump), so pill
+   and panel share one continuous vertical line — the goo rounds it gently. */
+[data-vx-position$="left"] .vx-toast__pill {
+  margin-left: 0;
+  margin-right: auto;
+  border-radius: 999px 999px 999px 0;
+}
+
+[data-vx-position$="left"] .vx-toast__panel {
+  border-top-left-radius: 0;
+}
+
+[data-vx-position$="right"] .vx-toast__pill {
+  margin-right: 0;
+  margin-left: auto;
+  border-radius: 999px 999px 0 999px;
+}
+
+[data-vx-position$="right"] .vx-toast__panel {
+  border-top-right-radius: 0;
+}
+
+.vx-toast__dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vx-toast-tone) 24%, transparent);
+  color: var(--vx-toast-tone-foreground);
+}
+
+.vx-toast__dot > svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.vx-toast__spinner {
+  animation: vx-toast-spin 0.8s linear infinite;
+}
+
+@keyframes vx-toast-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vx-toast__title {
+  color: var(--vx-toast-tone-foreground);
+}
+
+.vx-toast__panel {
+  border-radius: calc(var(--vx-radius-control) * 1.25);
+  padding: 1.4375rem 1.25rem 1.125rem;
+  transform-origin: 50% 0;
+}
+
+[data-vx-position$="left"] .vx-toast__panel {
+  transform-origin: 0 0;
+}
+
+[data-vx-position$="right"] .vx-toast__panel {
+  transform-origin: 100% 0;
+}
+
+.vx-toast__description {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--vx-toast-ink), transparent 18%);
+}
+
+.vx-toast__action {
+  margin-top: 0.625rem;
+  padding: 0.375rem 0.875rem;
+  border: none;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vx-toast-ink), transparent 88%);
+  color: var(--vx-toast-ink);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.vx-toast__action:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 var(--vx-focus-width) var(--vx-color-focus);
+}
+
+[data-vx-announcer] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.vx-toast[data-vx-tone="neutral"] {
+  --vx-toast-tone: var(--vx-toast-ink);
+  --vx-toast-tone-foreground: var(--vx-toast-ink);
+}
+
+.vx-toast[data-vx-tone="success"] {
+  --vx-toast-tone: var(--vx-color-success-solid);
+  --vx-toast-tone-foreground: color-mix(in srgb, var(--vx-color-success-solid) 52%, var(--vx-toast-ink));
+}
+
+.vx-toast[data-vx-tone="danger"] {
+  --vx-toast-tone: var(--vx-color-danger-solid);
+  --vx-toast-tone-foreground: color-mix(in srgb, var(--vx-color-danger-solid) 52%, var(--vx-toast-ink));
+}
+
+.vx-toast[data-vx-tone="warning"] {
+  --vx-toast-tone: var(--vx-color-warning-solid);
+  --vx-toast-tone-foreground: color-mix(in srgb, var(--vx-color-warning-solid) 52%, var(--vx-toast-ink));
+}
+
+.vx-toast[data-vx-tone="info"] {
+  --vx-toast-tone: var(--vx-color-info-solid);
+  --vx-toast-tone-foreground: color-mix(in srgb, var(--vx-color-info-solid) 52%, var(--vx-toast-ink));
+}
+
+/* ===== LIQUID IN (chosen in the lab): pill morphs in; panel is born
+   congruent with it and stretches out; text breathes last. ===== */
+[data-vx-phase="entering"] .vx-toast__pill {
+  animation: vx-toast-pill-in 0.34s both;
+}
+
+[data-vx-phase="entering"] .vx-toast__panel {
+  animation: vx-toast-panel-in 0.55s 0.22s both;
+}
+
+[data-vx-phase="entering"] .vx-toast__ink .vx-toast__panel > * {
+  animation: vx-toast-text-in 0.3s ease 0.6s both;
+}
+
+/* ===== SETTLE / UPDATE (toast.promise, coalesced re-fires): the card stays;
+   the pill pulses while its dot+title crossfade, and the panel replays the
+   liquid stretch. Swap nodes are keyed by revision, so remount restarts the
+   animations even across repeated updates. ===== */
+[data-vx-phase="updating"] .vx-toast__pill {
+  animation: vx-toast-pill-swap 0.45s cubic-bezier(0.3, 1.3, 0.4, 1) both;
+}
+
+[data-vx-phase="updating"] .vx-toast__pill > * {
+  animation: vx-toast-text-in 0.28s ease 0.1s both;
+}
+
+[data-vx-phase="updating"] .vx-toast__panel {
+  animation: vx-toast-panel-in 0.55s 0.16s both;
+}
+
+[data-vx-phase="updating"] .vx-toast__ink .vx-toast__panel > * {
+  animation: vx-toast-text-in 0.3s ease 0.5s both;
+}
+
+@keyframes vx-toast-pill-swap {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.07, 1.14);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+/* ===== LIQUID OUT: text ducks, panel reabsorbs into the pill, pill pops
+   away. Removal listens for vx-toast-pill-out's end. ===== */
+[data-vx-phase="leaving"] .vx-toast__ink .vx-toast__panel > * {
+  animation: vx-toast-text-out 0.12s ease both;
+}
+
+[data-vx-phase="leaving"] .vx-toast__panel {
+  animation: vx-toast-panel-out 0.3s cubic-bezier(0.4, 0.1, 0.6, 1) 0.08s both;
+}
+
+[data-vx-phase="leaving"] .vx-toast__pill {
+  animation: vx-toast-pill-out 0.2s ease-in 0.3s both;
+}
+
+@keyframes vx-toast-pill-in {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.35, 0.5);
+    animation-timing-function: cubic-bezier(0.3, 0.7, 0.4, 1);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.06, 0.94);
+    animation-timing-function: cubic-bezier(0.3, 1.2, 0.4, 1);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vx-toast-panel-in {
+  0% {
+    opacity: 0;
+    border-radius: 999px;
+    transform: translateY(-30px) scale(0.5, 0.34);
+    animation-timing-function: cubic-bezier(0.4, 0.2, 0.4, 1);
+  }
+  12% {
+    opacity: 1;
+    border-radius: 999px;
+    transform: translateY(-26px) scale(0.54, 0.4);
+    animation-timing-function: cubic-bezier(0.25, 0.6, 0.3, 1);
+  }
+  58% {
+    border-radius: calc(var(--vx-radius-control) * 1.25);
+    transform: translateY(2px) scale(1.01, 1.05);
+    animation-timing-function: cubic-bezier(0.25, 0.85, 0.3, 1);
+  }
+  100% {
+    opacity: 1;
+    border-radius: calc(var(--vx-radius-control) * 1.25);
+    transform: none;
+  }
+}
+
+@keyframes vx-toast-panel-out {
+  0% {
+    opacity: 1;
+    border-radius: calc(var(--vx-radius-control) * 1.25);
+    transform: none;
+  }
+  62% {
+    opacity: 1;
+    border-radius: 999px;
+    transform: translateY(-18px) scale(0.62, 0.5);
+  }
+  100% {
+    opacity: 0;
+    border-radius: 999px;
+    transform: translateY(-24px) scale(0.55, 0.42);
+  }
+}
+
+@keyframes vx-toast-pill-out {
+  0% {
+    opacity: 1;
+    transform: none;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(3px) scale(0.68, 0.74);
+  }
+}
+
+@keyframes vx-toast-text-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes vx-toast-text-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-toast [class*="vx-toast__"] {
+    animation: none !important;
+  }
+
+  .vx-toast {
+    animation: none !important;
+    transition: none !important;
+  }
+}

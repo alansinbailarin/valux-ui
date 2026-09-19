@@ -1,0 +1,64 @@
+/* Declared on providers too so portaled dialogs recompute the derived values
+   from their inherited theme instead of :root's. */
+:root,
+[data-vx-provider] {
+  --vx-dialog-z: 1200;
+  /* Denser glass than the menu over the same overlay plane (--vx-surface-3):
+     a modal reads as a solid place to work, so more opacity and a deeper
+     backdrop blur. The plane carries the mode flip and the small primary
+     tint, so a themed `primary` colors the panel in BOTH modes without the
+     light panel ever reading as gray on a white page. */
+  --vx-dialog-surface: color-mix(
+    in srgb,
+    var(--vx-surface-3) var(--vx-dialog-opacity),
+    transparent
+  );
+  --vx-dialog-opacity: 94%;
+  --vx-dialog-lowlight: rgba(9, 9, 11, 0.05);
+  --vx-dialog-backdrop: blur(24px) saturate(180%);
+  --vx-dialog-scrim: rgba(9, 9, 11, 0.2);
+  --vx-dialog-scrim-backdrop: blur(2px);
+  --vx-dialog-max-inline: min(92vw, 36rem);
+  --vx-dialog-max-block: min(85vh, 40rem);
+  /* Derived from the kit's single radius token, but rounder: the big modal
+     surface reads better with more curve than a control. */
+  --vx-dialog-radius: calc(var(--vx-radius-control) * 1.5);
+  --vx-dialog-padding: 1.25rem;
+}
+
+[data-vx-mode="light"],
+[data-vx-mode="system"] {
+  --vx-dialog-opacity: 94%;
+  --vx-dialog-lowlight: rgba(9, 9, 11, 0.05);
+  --vx-dialog-scrim: rgba(9, 9, 11, 0.2);
+}
+
+[data-vx-mode="dark"] {
+  --vx-dialog-opacity: 88%;
+  --vx-dialog-lowlight: transparent;
+  --vx-dialog-scrim: rgba(0, 0, 0, 0.42);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* :where() gates the match without touching specificity: a bare `:root`
+     here matched <html> even when it carried an explicit data-vx-mode="light",
+     and — being equal specificity (0,1,0) but later in the file — beat the
+     light block on every dark-OS machine. Root-level mode forcing (the
+     no-FOUC pattern) could never reach light. The guard steps aside for
+     explicit light; explicit dark agrees with these values anyway. */
+  :root:where(:not([data-vx-mode="light"])),
+  [data-vx-mode="system"] {
+    --vx-dialog-opacity: 88%;
+    --vx-dialog-lowlight: transparent;
+    --vx-dialog-scrim: rgba(0, 0, 0, 0.42);
+  }
+}
+
+/* Touch devices: a full-viewport backdrop blur is one of the most expensive
+   things a mobile GPU can do mid-animation. Native platforms only dim. */
+@media (pointer: coarse) {
+  :root,
+  [data-vx-provider] {
+    --vx-dialog-scrim-backdrop: none;
+  }
+}

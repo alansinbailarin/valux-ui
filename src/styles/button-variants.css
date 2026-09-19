@@ -1,0 +1,55 @@
+.vx-button[data-vx-variant="solid"] {
+  --vx-button-background: var(--vx-button-solid-tone);
+  --vx-button-background-hover: color-mix(
+    in srgb,
+    var(--vx-button-solid-tone),
+    var(--vx-button-on-tone) 12%
+  );
+  --vx-button-foreground: var(--vx-button-on-tone);
+  --vx-button-variant-border: color-mix(
+    in srgb,
+    var(--vx-button-solid-tone),
+    black 18%
+  );
+}
+
+.vx-button[data-vx-variant="outline"] {
+  --vx-button-background: transparent;
+  --vx-button-background-hover: color-mix(
+    in srgb,
+    var(--vx-button-accent-tone),
+    transparent 90%
+  );
+  --vx-button-foreground: var(--vx-button-foreground-tone);
+  --vx-button-variant-border: color-mix(
+    in srgb,
+    var(--vx-button-accent-tone),
+    transparent 60%
+  );
+}
+
+.vx-button[data-vx-variant="soft"] {
+  --vx-button-background: color-mix(
+    in srgb,
+    var(--vx-button-accent-tone),
+    transparent 84%
+  );
+  --vx-button-background-hover: color-mix(
+    in srgb,
+    var(--vx-button-accent-tone),
+    transparent 76%
+  );
+  --vx-button-foreground: var(--vx-button-foreground-tone);
+  --vx-button-variant-border: transparent;
+}
+
+.vx-button[data-vx-variant="ghost"] {
+  --vx-button-background: transparent;
+  --vx-button-background-hover: color-mix(
+    in srgb,
+    var(--vx-button-accent-tone),
+    transparent 90%
+  );
+  --vx-button-foreground: var(--vx-button-foreground-tone);
+  --vx-button-variant-border: transparent;
+}

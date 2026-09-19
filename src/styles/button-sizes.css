@@ -1,0 +1,35 @@
+.vx-button[data-vx-size="xs"] {
+  --vx-control-height: 1.75rem;
+  --vx-control-padding-inline: 0.625rem;
+  --vx-control-gap: 0.25rem;
+  --vx-button-icon-gap: 0.375rem;
+  --vx-font-size-control: 0.75rem;
+  --vx-line-height-control: 1rem;
+}
+
+.vx-button[data-vx-size="sm"] {
+  --vx-control-height: 2rem;
+  --vx-control-padding-inline: 0.75rem;
+  --vx-control-gap: 0.375rem;
+  --vx-button-icon-gap: 0.5rem;
+  --vx-font-size-control: 0.8125rem;
+  --vx-line-height-control: 1.125rem;
+}
+
+.vx-button[data-vx-size="md"] {
+  --vx-control-height: 2.5rem;
+  --vx-control-padding-inline: 1rem;
+  --vx-control-gap: 0.5rem;
+  --vx-button-icon-gap: 0.625rem;
+  --vx-font-size-control: 0.875rem;
+  --vx-line-height-control: 1.25rem;
+}
+
+.vx-button[data-vx-size="lg"] {
+  --vx-control-height: 3rem;
+  --vx-control-padding-inline: 1.25rem;
+  --vx-control-gap: 0.625rem;
+  --vx-button-icon-gap: 0.75rem;
+  --vx-font-size-control: 1rem;
+  --vx-line-height-control: 1.5rem;
+}

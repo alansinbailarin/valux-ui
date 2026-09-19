@@ -1,0 +1,189 @@
+/* Switch — pill track (fully round), CHIP thumb (elongated, soft
+   corners — deliberately not a circle). While dragging, the thumb turns
+   into a LIQUID LENS: it grows past the track as translucent glass
+   (backdrop blur + inner highlights) and the fill color follows the
+   finger. Colors derive from tokens — dark mode needs no extra rules. */
+.vx-switch {
+  --vx-switch-w: 3.25rem;
+  --vx-switch-h: 1.625rem;
+  --vx-switch-pad: 3px;
+  --vx-switch-thumb-h: calc(var(--vx-switch-h) - var(--vx-switch-pad) * 2);
+  --vx-switch-thumb-w: calc(var(--vx-switch-thumb-h) * 1.3);
+  --vx-switch-travel: calc(var(--vx-switch-w) - var(--vx-switch-thumb-w) - var(--vx-switch-pad) * 2);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  cursor: pointer;
+  font-family: var(--vx-font-family);
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.vx-switch[data-vx-size="sm"] {
+  --vx-switch-w: 2.75rem;
+  --vx-switch-h: 1.375rem;
+  --vx-switch-pad: 2px;
+}
+
+.vx-switch[data-vx-size="lg"] {
+  --vx-switch-w: 3.75rem;
+  --vx-switch-h: 1.875rem;
+  --vx-switch-pad: 3px;
+}
+
+.vx-switch[data-vx-label-first] {
+  flex-direction: row-reverse;
+  justify-content: space-between;
+}
+
+/* Real checkbox, visually hidden but focusable. */
+.vx-switch__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The track IS 100% circular: full pill. */
+.vx-switch__track {
+  position: relative;
+  flex: none;
+  width: var(--vx-switch-w);
+  height: var(--vx-switch-h);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--vx-color-on-surface), transparent 78%);
+  /* On BOTH track and thumb: the touch usually lands on the thumb, and
+     iOS fires pointercancel (to scroll) unless the target opts out. */
+  touch-action: none;
+}
+
+/* Checked color lives on a fill layer whose opacity FOLLOWS the finger
+   while dragging (the hook drives it inline); settled states transition. */
+.vx-switch__fill {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--vx-color-primary);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.vx-switch__input:checked + .vx-switch__track > .vx-switch__fill {
+  opacity: 1;
+}
+
+.vx-switch__track[data-vx-dragging] > .vx-switch__fill {
+  transition: none;
+}
+
+.vx-switch__input:focus-visible + .vx-switch__track {
+  box-shadow: 0 0 0 var(--vx-focus-width) var(--vx-color-focus);
+}
+
+.vx-switch__input:disabled + .vx-switch__track {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.vx-switch:has(.vx-switch__input:disabled) {
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+/* CHIP thumb: elongated, corners at ~42% of its height — not a circle.
+   Always WHITE, in both modes and in every state (user's call after
+   living with the dark chip). */
+.vx-switch__thumb {
+  position: absolute;
+  top: var(--vx-switch-pad);
+  left: var(--vx-switch-pad);
+  touch-action: none;
+  width: var(--vx-switch-thumb-w);
+  height: var(--vx-switch-thumb-h);
+  border-radius: calc(var(--vx-switch-thumb-h) * 0.42);
+  background: #fff;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.24),
+    0 3px 8px rgba(0, 0, 0, 0.15);
+  transition:
+    transform 0.25s cubic-bezier(0.3, 1.05, 0.4, 1),
+    scale 0.25s cubic-bezier(0.3, 1.15, 0.4, 1),
+    width 0.2s cubic-bezier(0.3, 1.05, 0.4, 1),
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.vx-switch__input:checked + .vx-switch__track > .vx-switch__thumb {
+  transform: translateX(var(--vx-switch-travel));
+}
+
+/* iOS squish: pressing stretches the chip toward the empty side. */
+.vx-switch:active .vx-switch__thumb {
+  width: calc(var(--vx-switch-thumb-w) * 1.12);
+}
+
+.vx-switch__input:checked:active + .vx-switch__track > .vx-switch__thumb {
+  transform: translateX(calc(var(--vx-switch-travel) - var(--vx-switch-thumb-w) * 0.12));
+}
+
+/* LIQUID LENS while dragging: the chip grows past the track and turns to
+   glass — the fill and the page show through it. The hook owns the
+   translate (no easing lag); scale/material morph in smoothly. */
+.vx-switch__track[data-vx-dragging] > .vx-switch__thumb {
+  z-index: 1;
+  will-change: transform;
+  scale: 1.35;
+  /* WHITE-based glass in both modes — the lens stays a bright droplet. */
+  background: color-mix(in srgb, #fff, transparent 45%);
+  -webkit-backdrop-filter: blur(3px) saturate(1.5);
+  backdrop-filter: blur(3px) saturate(1.5);
+  box-shadow:
+    inset 0 0 0 1px color-mix(in srgb, #fff, transparent 55%),
+    inset 0 6px 10px color-mix(in srgb, #fff, transparent 70%),
+    0 4px 14px rgba(0, 0, 0, 0.25);
+  transition:
+    scale 0.2s cubic-bezier(0.3, 1.15, 0.4, 1),
+    width 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.vx-switch__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  padding-top: 0.0625rem;
+}
+
+.vx-switch__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--vx-color-on-surface);
+}
+
+.vx-switch[data-vx-size="sm"] .vx-switch__label { font-size: 0.8125rem; }
+
+.vx-switch__description {
+  font-size: 0.75rem;
+  color: color-mix(in srgb, var(--vx-color-on-surface), transparent 40%);
+}
+
+/* Phones: cheaper glass — heavy backdrop blur janks the drag. */
+@media (pointer: coarse) {
+  .vx-switch__track[data-vx-dragging] > .vx-switch__thumb {
+    scale: 1.28;
+    -webkit-backdrop-filter: blur(1.5px) saturate(1.35);
+    backdrop-filter: blur(1.5px) saturate(1.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vx-switch__track,
+  .vx-switch__fill,
+  .vx-switch__thumb {
+    transition: none;
+  }
+}

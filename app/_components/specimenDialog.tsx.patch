@@ -1,0 +1,11 @@
+--- app/_components/specimenDialog.tsx
++++ app/_components/specimenDialog.tsx
+@@ -79,7 +79,7 @@
+     // (which also clicks outside and triggers a close) instantly resets the dialog instead 
+     // of corrupting the morph animation mid-flight.
+     return (
+-      <div key={JSON.stringify(v)} style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '2rem 0' }}>
++      <div key={v.alert ? 'alert' : 'normal'} style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '2rem 0' }}>
+         <Dialog>
+           <Dialog.Trigger asChild>
+             <Button color={v.alert ? "danger" : "primary"}>

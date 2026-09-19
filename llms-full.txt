@@ -1,0 +1,1473 @@
+# Valux UI — full documentation (llms-full.txt)
+
+Valux UI provides accessible React components for modern Next.js
+applications with a native-mobile feel: Button, Card, Menu, Popover, Tooltip, Dialog, Sheet, Toast, Input, TextArea, Switch, Checkbox, Radio, Select, ContextMenu, Drawer, and the Hero view-transition system,
+sharing one theme, ONE pronounced radius, and one motion signature. Zero
+runtime dependencies; plain CSS ("@valux/ui/styles.css") and TypeScript
+types. Install: `pnpm add @valux/ui`. Requires React 18/19.
+
+Everything below is generated from docs/ — edit those sources, then run
+`pnpm docs:llms`.
+
+---
+
+# Getting started
+
+Valux UI is a zero-dependency React component library for modern
+Next.js applications: accessible components with a native-mobile feel and
+one shared motion signature (panels morph out of their triggers).
+
+## Install
+
+```bash
+pnpm add @valux/ui   # or: npm install Valux UI UI / yarn add Valux UI UI
+```
+
+Requires React 18 or 19. Works in any React app; examples below use the
+Next.js App Router.
+
+## Setup (once, at the root)
+
+Import the stylesheet, wrap the app in `ValuxProvider`, and mount
+`Toaster` once if you use toasts:
+
+```tsx
+// app/layout.tsx
+import "@valux/ui/styles.css";
+import { ValuxProvider, Toaster } from "@valux/ui";
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <ValuxProvider theme={{ mode: "system", color: { primary: "#4f46e5" } }}>
+          {children}
+          <Toaster position="top" />
+        </ValuxProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+- The provider is **server-safe** (renders a plain `div` with data
+  attributes + CSS variables) — the root layout can stay a Server
+  Component.
+- Interactive components (`Menu`, `Dialog`, `Sheet`, `Popover`, `Tooltip`)
+  are client components internally; you can render them from Server
+  Components without adding `"use client"` yourself. Add it only to YOUR
+  files when they use hooks or handlers.
+- Mount `Toaster` exactly ONCE. Then call `toast(...)` from anywhere — no
+  hooks, no context.
+
+## First components
+
+```tsx
+import { Button, Dialog, Menu, toast } from "@valux/ui";
+
+<Button color="primary" onClick={() => toast("Saved")}>Save</Button>
+
+<Menu>
+  <Menu.Trigger asChild><Button variant="soft">Options</Button></Menu.Trigger>
+  <Menu.Content>
+    <Menu.Item onSelect={() => {}}>Rename</Menu.Item>
+    <Menu.Item destructive onSelect={() => {}}>Delete</Menu.Item>
+  </Menu.Content>
+</Menu>
+
+<Dialog>
+  <Dialog.Trigger asChild><Button color="primary">Edit profile</Button></Dialog.Trigger>
+  <Dialog.Content size="sm">
+    <Dialog.Title>Edit profile</Dialog.Title>
+    <Dialog.Description>Update your visible name.</Dialog.Description>
+    <Dialog.Body>{/* form */}</Dialog.Body>
+    <Dialog.Footer>
+      <Dialog.Close asChild><Button color="primary">Save</Button></Dialog.Close>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>
+```
+
+## Kit conventions (IMPORTANT for generated code)
+
+These are deliberate design rules — code that follows them looks and feels
+like Valux UI; code that fights them does not:
+
+1. **One radius for everything.** There is NO `radius`/`rounded` prop
+   anywhere and no size scale for corners. The whole kit shares one
+   pronounced token (`--vx-radius-control`, 1rem); panels are 1.5×.
+2. **Dialogs never have a Cancel button.** The built-in X (top-right) is
+   the one dismiss control. Footers hold confirm actions only (via
+   `Dialog.Close`).
+3. **Sheet is its own component, not a Dialog variant.** Bottom sheets
+   slide up from the edge (`Sheet` + detents `half`/`full`, optional
+   `expandable`); dialogs morph out of their trigger.
+4. **Triggers use `asChild`** to wrap your own button/element instead of
+   nesting buttons.
+5. **Toasts queue.** One on stage at a time by default; the rest wait
+   behind as stacked cards and pass to the front — never render toast
+   lists yourself, never mount multiple `Toaster`s.
+6. **Pull-to-close is built in.** Menus, dialogs, and sheets close with
+   touch/trackpad pull gestures; do not add your own swipe-to-close.
+7. **Theming is tokens, not props.** Brand color, density, dark mode, and
+   font come from the provider theme; components have no per-instance
+   color overrides beyond their documented `color`/`tone` props.
+8. **Reduced motion is automatic.** Every animation swaps for an instant
+   crossfade under `prefers-reduced-motion` — no configuration needed.
+
+## TypeScript
+
+Everything ships typed (ESM + CJS). Notable exports: component props
+(`ButtonProps`, `DialogContentProps`, …), `ValuxTheme`,
+`ToastOptions`, and the `toast` API (`toast`, `toast.promise`,
+`toast.dismiss`).
+
+---
+
+# ValuxProvider
+
+Wraps your application (or any subtree) and scopes the theme to its
+descendants. Server-safe: it renders a plain `div` with data attributes and
+CSS custom properties — no context is required at runtime for styling.
+
+```tsx
+import { ValuxProvider } from "@valux/ui";
+import "@valux/ui/styles.css";
+
+<ValuxProvider theme={{ mode: "system", color: { primary: "#4f46e5" } }}>
+  <App />
+</ValuxProvider>
+```
+
+## Theme options (`ValuxTheme`)
+
+| Option | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `mode` | `"system" \| "light" \| "dark"` | `"system"` | Dark mode swaps every surface/text token. |
+| `color.primary` | CSS color string | near-black | The brand color. Buttons, menus, and dialogs derive hovers, washes, and foregrounds from it. |
+| `color.onPrimary` | CSS color string | auto | Text color on primary surfaces; computed from `primary`'s luminance when omitted. |
+| `color.surfaceTint` | `number` (0–100) | `0` | Washes the page surfaces with a hint of `primary`. |
+| `density` | `"xs" \| "sm" \| "md" \| "lg"` | `"md"` | Control heights, paddings, and typography scale together. |
+| `fontFamily` | CSS font stack | system | Applied to every component. |
+
+Providers nest: an inner provider only overrides what it specifies, so a
+feature can change only its density.
+
+## Rounding
+
+Rounding is deliberately **not** configurable per component or per size: the
+whole kit shares one pronounced radius token, `--vx-radius-control` (`1rem`).
+Panels (menu, dialog, sheet) derive `calc(var(--vx-radius-control) * 1.5)`;
+menu items hover as full pills. Advanced consumers can override the token in
+CSS, but the API intentionally offers no radius prop.
+
+## Tokens
+
+Every visual decision is a `--vx-*` custom property (colors, radius, density,
+motion, per-component surfaces). Override them on `:root`, on a provider, or
+on a single component instance:
+
+```css
+.my-feature {
+  --vx-color-primary: #0ea5e9;
+  --vx-dialog-max-inline: min(94vw, 44rem);
+}
+```
+
+Portaled surfaces (menu, dialog, sheet) copy the nearest provider's theme
+onto their portal node at creation, so they always match their surroundings
+— including derived `color-mix` tokens.
+
+---
+
+# Cursor
+
+A rounded arrowhead that replaces the native pointer across the page: an
+OS-composited static tier for everyone, and — on fine pointers without
+reduced motion — a live arrow that trails the hand with easing and turns
+its tip toward the direction of travel.
+
+```tsx
+import { Cursor } from "@valux/ui";
+
+// Mount ONCE (e.g. in your root layout):
+<Cursor />
+```
+
+Nothing happens from styles alone: the whole system is gated behind a
+`data-vx-cursor` attribute the component manages, so importing the kit's
+CSS never hijacks a page's cursor.
+
+- **Zero-flash**: server-render `data-vx-cursor="static"` on `<html>`.
+- **Pressables** (`a`, `button`, `[role="button"]`, `label`, `summary`)
+  invert the arrow's fill — feedback by dress, never by shape. Text fields
+  keep the native I-beam.
+- **Theming**: `--vx-cursor-ink` / `--vx-cursor-edge`, mode-aware out of
+  the box.
+- **Reduced motion / coarse pointers**: the static tier only — same
+  drawing, standing still. No JS cursor is ever mounted there.
+
+---
+
+# ModeOrb
+
+The color-mode switch: a fixed sphere (bottom right) whose face previews
+the mode a click will bring. Toggling doesn't swap the theme — it reveals
+it as a wave washing out of the orb across the page, with a crest of foam
+riding the front.
+
+```tsx
+import { ModeOrb } from "@valux/ui";
+
+// Mount ONCE (e.g. in your root layout):
+<ModeOrb />
+```
+
+- Sets `data-vx-mode` on `<html>`; every kit token follows. The choice
+  persists in `localStorage` (`vx-mode`) — replay it before first paint
+  with an inline script to avoid a flash.
+- The wave rides `document.startViewTransition`, scoped by `data-vx-wave`
+  so no other transition inherits its choreography. Frames are driven by
+  production, never by the clock: a cold first flip holds the front at the
+  orb instead of teleporting it mid-screen.
+- **Reduced motion**: an instant flip — no wave, no disguise.
+- `className` / `style` pass through (e.g. `position: "relative"` with `right`/`bottom: "auto"` to place it
+  in-flow for demos — never `static`: the sphere is a ::before that needs
+  a positioned host).
+
+---
+
+# Button
+
+The base control. Plain CSS, themed from the provider, with a WAAPI press
+animation (compress on press, spring back on release) and a CSS fallback
+when JavaScript is unavailable.
+
+```tsx
+import { Button } from "@valux/ui";
+
+<Button color="primary" onClick={save}>Save</Button>
+<Button variant="soft" startIcon={<ShareIcon />}>Share</Button>
+<Button variant="ghost" iconOnly aria-label="More options"><DotsIcon /></Button>
+<Button as="a" href="/pricing" variant="outline">Pricing</Button>
+```
+
+## Props (`ButtonProps`)
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `variant` | `"solid" \| "outline" \| "soft" \| "ghost"` | `"solid"` | Flat by default — no inner highlight or drop shadow anywhere. |
+| `color` | `"neutral" \| "primary" \| "danger" \| "success" \| "warning" \| "info"` | `"neutral"` | `neutral` adapts black/white to the mode; `primary` is the theme brand color. |
+| `size` | `"xs" \| "sm" \| "md" \| "lg"` | `"md"` | Independent from provider `density` (which scales everything). |
+| `iconOnly` | `boolean` | `false` | Requires `aria-label` (enforced by the types). |
+| `startIcon` / `endIcon` | `ReactNode` | — | Sized and spaced automatically. |
+| `loading` | `boolean` | `false` | Disables interaction, shows a spinner; `loadingText` replaces the label. |
+| `fullWidth` | `boolean` | `false` | Stretches to the container. |
+| `disabled` | `boolean` | `false` | Flattened styling, `cursor: not-allowed`. |
+| `as` | `"button" \| "a"` | `"button"` | `as="a"` renders a real anchor with `href`; disabled anchors drop the href and block clicks. |
+| `cursor` | CSS cursor | auto | Escape hatch. |
+
+## Behavior
+
+- Press motion runs on the compositor (transform only); reduced motion
+  disables it.
+- Touch pointers are never pointer-captured — capturing on `pointerdown`
+  suppresses the synthesized click on iOS Safari (every tap would go dead).
+- Focus ring: a themed 2px inset ring (`--vx-focus-width`,
+  `--vx-color-focus`) on `:focus-visible` only.
+- Buttons are the canonical triggers for Menu, Dialog, and Sheet via
+  `asChild` — the surfaces adopt their colors and geometry.
+
+---
+
+# Card
+
+A composable surface — a bordered container that groups Media, Header,
+Title, Subtitle, Body, and Footer, all optional, all stacked in whatever
+order you give them. Phase 1 is the static surface: no press, no link,
+no expand — just a themed box you fill in, with a customizable
+interior. Three looks: `outline` (default, a hairline border),
+`elevated` (hairline + drop shadow in light, a raised surface + inset
+highlight in dark — never shadow-dependent), and `soft` (a raised
+surface with the same hairline in light).
+
+```tsx
+import { Card } from "@valux/ui";
+
+<Card variant="elevated" style={{ maxWidth: 360 }}>
+  <Card.Media src="/report-cover.jpg" ratio={16 / 9} />
+  <Card.Header>
+    <Card.Title>Quarterly report</Card.Title>
+    <Card.Subtitle>Q2 2026</Card.Subtitle>
+  </Card.Header>
+  <Card.Body>Revenue grew 12% over the previous quarter.</Card.Body>
+  <Card.Footer>
+    <Button variant="ghost">Dismiss</Button>
+    <Button color="primary">Open</Button>
+  </Card.Footer>
+</Card>
+```
+
+## Examples
+
+Three variants, side by side:
+
+```tsx
+<Card variant="outline">
+  <Card.Header>
+    <Card.Title>Outline</Card.Title>
+    <Card.Subtitle>The default variant</Card.Subtitle>
+  </Card.Header>
+  <Card.Body>Defined border, no shadow.</Card.Body>
+</Card>
+<Card variant="elevated">…</Card>
+<Card variant="soft">…</Card>
+```
+
+Media with overlaid text (App Store "Today" style):
+
+```tsx
+<Card variant="elevated" style={{ maxWidth: 360 }}>
+  <Card.Media ratio={4 / 3}>
+    <span style={{ position: "absolute", inset: 0, background: "…" }} />
+    <Card.Title as="h4" style={{ position: "relative", color: "#fff" }}>
+      Featured
+    </Card.Title>
+  </Card.Media>
+  <Card.Body>Support copy under the image.</Card.Body>
+</Card>
+```
+
+## API
+
+- **`Card`** — root: `<div>` accepting all native div props, plus
+  `variant` (`"outline" | "elevated" | "soft"`, default `"outline"`).
+  All anatomy is optional — a bare `<Card><Card.Body>…</Card.Body></Card>`
+  is valid.
+- **`Card.Media`** — cover area. `src` renders an `<img>` (`alt`
+  defaults to `""` — set it for meaningful images); `ratio` reserves
+  the aspect ratio to avoid layout shift (default `16/9`); `imgProps`
+  passes native `<img>` attributes through to the shortcut image
+  (everything except `src`/`alt`). `children` overlay the media
+  (App Store text-over-cover) — pair with `Card.Title` styled for
+  contrast against the image.
+- **`Card.Header`** — groups `Card.Title` + `Card.Subtitle` above the
+  body.
+- **`Card.Title`** — semantic heading; `as` picks the level
+  (`"h2" | "h3" | "h4" | "h5" | "h6"`, default `"h3"`) so a card's
+  heading can match its place in the page outline.
+- **`Card.Subtitle`** — secondary line under the title, muted color.
+- **`Card.Body`** — free content region.
+- **`Card.Footer`** — action row, right-aligned, kit control gap
+  between buttons.
+- **`Card.Separator`** — hairline divider between sections. `inset`
+  (`"none" | "content"`, default `"none"`) picks whether it bleeds to the
+  card edge or lines up with the padded content edge (the iOS
+  grouped-list look). Renders an `<hr>`, so it is an exposed
+  `separator` for assistive tech with no extra ARIA.
+
+### Interior
+
+`Card.Header`, `Card.Body`, and `Card.Footer` share two extra props:
+
+- **`surface`** (`"none" | "subtle"`, default `"none"`) — puts that one
+  section on a slightly different plane, for the grouped-settings look
+  where a header or footer sits off the card's own surface. `"subtle"`
+  is a translucent wash of the foreground color
+  (`--vx-card-subtle-alpha`), not a fixed fill, so it reads correctly on
+  all three variants and in both modes.
+- **`padding`** (`"none"`) — drops that section's padding. Omit it to
+  inherit the card's spacing.
+
+`Card` itself takes **`padding`** (`"default" | "none"`), which applies
+to the card and every part inside it. `Card.Media` always bleeds to the
+card edges either way.
+
+```tsx
+<Card variant="soft">
+  <Card.Header surface="subtle">
+    <Card.Title>Settings</Card.Title>
+  </Card.Header>
+  <Card.Separator />
+  <Card.Body>Wi-Fi</Card.Body>
+  <Card.Separator inset="content" />
+  <Card.Body>Bluetooth</Card.Body>
+  <Card.Footer padding="none" surface="subtle">
+    <Button variant="ghost" style={{ width: "100%" }}>See all</Button>
+  </Card.Footer>
+</Card>
+```
+
+## Behavior
+
+- Every part is a plain, non-interactive div (or `<img>`/heading) —
+  phase 1 ships no press, link, or expand behavior; those land in
+  later phases.
+- Parts stack in whatever order you render them; spacing between parts
+  comes from the card padding/gap tokens, so density theming stays
+  centralized.
+- No variant ever relies on shadow alone to read as "above" the page,
+  because a page is either white or near-black and each kills a
+  different cue. In light, `elevated` and `soft` carry a hairline as
+  well as their fill — a drop shadow does not register on white. In
+  dark, `elevated` flips to the raised plane plus an inset top
+  highlight and the hairline switches off, since shadows barely read on
+  dark backgrounds.
+- Every variant is checked against the page it sits on, in *both*
+  modes: `src/card/card-contrast.styles.test.ts` requires each one to
+  clear the page by at least 2.5 OKLCH lightness points or carry an
+  edge of at least 15% alpha. Shadow deliberately counts for nothing.
+- `outline`'s border and `elevated`'s shadow both derive from theme
+  tokens, so they stay correct inside a nested opposite-mode island.
+
+## Theming
+
+Card sits on the kit's shared surface ladder — `--vx-surface-1` (the
+page), `--vx-surface-2` (raised) — the same ladder Menu, Dialog,
+Popover, and Select consume at `--vx-surface-3`. Retheme the ladder and
+every component follows.
+
+### Instance tokens
+
+These are public API. Set them in `style` on a single `<Card>` and they
+cascade into every part, because Card resolves all of them on the card
+element itself rather than on `:root`:
+
+| Token | What it does |
+| --- | --- |
+| `--vx-card-padding` | Padding of every part (Header/Body/Footer, Media overlay). |
+| `--vx-card-gap` | Vertical spacing between parts. |
+| `--vx-card-shadow` | `elevated`'s box-shadow list. Mode-flipped: dark swaps the drop shadow for an inset top highlight. |
+| `--vx-card-border-alpha` | Alpha of `outline`'s border and of `Card.Separator`. |
+| `--vx-card-raised-border-alpha` | Alpha of the hairline `elevated` and `soft` carry. `0%` in dark. |
+| `--vx-card-elevated-bg` | Overrides `elevated`'s fill outright (unset by default; the fill is otherwise derived from the ladder). |
+| `--vx-card-elevated-shadow` | Overrides `elevated`'s shadow outright, ignoring `--vx-card-shadow`. |
+| `--vx-card-subtle-alpha` | Strength of a section's `surface="subtle"` wash. |
+| `--vx-card-separator-inset` | Inset used by `Card.Separator inset="content"`. |
+
+```tsx
+<Card
+  variant="elevated"
+  style={{
+    "--vx-card-padding": "1.5rem",
+    "--vx-card-gap": "0.75rem",
+    "--vx-card-shadow": "0 8px 30px rgb(79 70 229 / 0.28)",
+  } as CSSProperties}
+>
+  …
+</Card>
+```
+
+Set the same tokens on `:root` (or a mode island) to retheme every card
+at once. The mode blocks only flip inherited scalars, never the derived
+values, so a nested opposite-mode island — and a portaled panel themed
+by `usePortalTheme` — resolves them from the mode it actually inherits.
+
+---
+
+# Menu
+
+A morphing actions menu: the trigger visually **becomes** the panel. On open
+it compresses, streaks toward its destination with motion blur, and unfolds
+with a spring; on close it reverses into the trigger, with the trigger's
+content traveling inside the returning body (a "ghost") and landing exactly
+where the real trigger sits.
+
+```tsx
+import { Button, Menu } from "@valux/ui";
+
+<Menu>
+  <Menu.Trigger asChild>
+    <Button color="primary" iconOnly aria-label="Actions">+</Button>
+  </Menu.Trigger>
+  <Menu.Content>
+    <Menu.Label>Note</Menu.Label>
+    <Menu.Item icon={<PencilIcon />} shortcut="⌘N" onSelect={create}>New note</Menu.Item>
+    <Menu.Item icon={<ShareIcon />} disabled>Share</Menu.Item>
+    <Menu.Separator />
+    <Menu.Item icon={<TrashIcon />} destructive onSelect={remove}>Delete</Menu.Item>
+  </Menu.Content>
+</Menu>
+```
+
+## Parts
+
+- **`Menu`** — root. `open` / `defaultOpen` / `onOpenChange` (controlled or
+  uncontrolled).
+- **`Menu.Trigger`** — renders a native button, or `asChild` merges the
+  behavior onto your own element (typically a library `Button`). The trigger
+  hides while the menu is open (the panel IS the trigger) and reveals in a
+  crossfade as the body lands; trailing icons re-enter with a slide+blur
+  entrance the instant the panel unmounts.
+- **`Menu.Content`** — the panel. `side` / `align` default `"auto"`
+  (collision-aware). `surface`: `"auto"` follows the theme (white glass in
+  light, dark glass in dark); `"trigger"` adopts the trigger's solid colors
+  for full color continuity through the morph.
+- **`Menu.Item`** — `icon`, `disabled`, `destructive`, `onSelect` (runs and
+  closes), `shortcut` (trailing hint like `"⌘D"`; string shortcuts are
+  FUNCTIONAL while the menu is open — the matching combo activates the
+  item).
+- **`Menu.Separator`**, **`Menu.Label`** — group related actions.
+
+## Behavior
+
+- Content-sized panel (up to `min(60vh, 24rem)`, then scrolls); glass
+  surface with a whisper of the theme primary; rounding derived from the
+  kit's single radius token; items hover as full pills.
+- Keyboard: arrows move (skipping disabled), Home/End jump, type-ahead jumps
+  to matches, Enter/Space activate, Esc/Tab/outside-click close. Focus
+  returns to the trigger.
+- Pull-to-close gesture: drag down on touch, or two-finger swipe on
+  trackpads (inside or outside the panel) — the gesture scrubs the return
+  morph itself. Release short of the commit point and it springs back open;
+  past it, the close completes immediately.
+- The panel is portaled but inherits the nearest provider's theme (applied
+  at portal creation, so first-paint colors are correct).
+- Reduced motion replaces the morph with an instant swap.
+
+---
+
+# Popover
+
+An anchored, **non-modal** surface that morphs from its trigger — the Menu's
+body and choreography with free-form content instead of menu semantics.
+Use it for filters, share cards, mini-forms, pickers: anything that belongs
+next to the control that opened it.
+
+```tsx
+import { Button, Popover } from "@valux/ui";
+
+<Popover>
+  <Popover.Trigger asChild>
+    <Button variant="soft">Share</Button>
+  </Popover.Trigger>
+  <Popover.Content>
+    <p>Anyone with the link can view.</p>
+    <Popover.Close asChild>
+      <Button color="primary" fullWidth>Copy link</Button>
+    </Popover.Close>
+  </Popover.Content>
+</Popover>
+```
+
+## Parts
+
+- **`Popover`** — root. `open` / `defaultOpen` / `onOpenChange`.
+- **`Popover.Trigger`** — native button or `asChild`; same morph contract as
+  the Menu trigger (hides while open, reveals in a crossfade, icons re-enter
+  animated).
+- **`Popover.Content`** — free-form panel. `side` / `align` (`"auto"`,
+  collision-aware), `surface` (`"auto"` glass · `"trigger"` adopts the
+  trigger's colors), `dismissable`.
+- **`Popover.Close`** — closes from inside (native button or `asChild`).
+
+## Behavior
+
+- **Non-modal**: no scrim, no scroll lock, no inert background — the page
+  stays interactive. Esc, outside click, and the pull-to-close gesture
+  dismiss it; it participates in the layer stack (topmost dismisses first).
+- Focus moves to the first tabbable inside on open and returns to the
+  trigger on close. Named after its trigger (`aria-labelledby`).
+- Same glass material and rounding as the Menu; same portal theme
+  inheritance; same reduced-motion fallback.
+
+---
+
+# Tooltip
+
+A label that **buds out of its control** on hover or keyboard focus — a
+micro version of the kit's morph (scale + slight blur from the edge facing
+the trigger). Unlike every other surface, the trigger never hides: you are
+pointing at it.
+
+```tsx
+import { Button, Tooltip } from "@valux/ui";
+
+<Tooltip>
+  <Tooltip.Trigger asChild>
+    <Button iconOnly aria-label="Share"><ShareIcon /></Button>
+  </Tooltip.Trigger>
+  <Tooltip.Content>Share this notebook</Tooltip.Content>
+</Tooltip>
+```
+
+## Parts
+
+- **`Tooltip`** — root. `delay` (hover delay in ms, default 400; keyboard
+  focus shows immediately), plus `open` / `defaultOpen` / `onOpenChange`.
+- **`Tooltip.Trigger`** — native button or `asChild` over any element.
+- **`Tooltip.Content`** — the chip. `side` (`"top"` default, `"bottom"`,
+  `"left"`, `"right"`) / `align`, with automatic flip and viewport clamping.
+  Content is free-form and wraps up to 16rem — multi-line just works.
+- **`Tooltip.Title` / `Tooltip.Description`** — optional styled lines for
+  rich tooltips (bold first line + muted copy). Keep tooltips
+  NON-interactive; anything clickable belongs in a Popover.
+
+## Behavior
+
+- Shows on hover (after `delay`) and on `:focus-visible` (immediately);
+  hides on leave, blur, press, and Escape.
+- **Never opens from touch** — there is no hover on touch; controls must
+  carry their own labels there.
+- `role="tooltip"` + automatic `aria-describedby` wiring on the trigger
+  while visible.
+- Inverted high-contrast chip (dark on light themes, light on dark), themed
+  radius, `pointer-events: none` (it can never steal a click).
+- The entrance is the kit's streak in miniature: a thin seed squeezes out
+  of the trigger, stretches into a blurred line mid-flight, and unfolds with
+  a soft overshoot; the exit mirrors it back INTO the trigger.
+- **Warm group**: right after one tooltip hides, moving to a neighbor shows
+  it instantly (no second delay), like native toolbars.
+- Any scroll dismisses it (the anchor is drifting away).
+- Disabled buttons swallow pointer events in some browsers — wrap a disabled
+  trigger in a `span` if it must keep its tooltip.
+- Reduced motion disables the animations.
+
+---
+
+# Dialog
+
+The Menu grown into a modal: by default the panel morphs out of its trigger
+with the same choreography, scaled up for a larger surface. A subtle scrim
+fades in behind it, page scroll locks, the background becomes inert, and
+focus is trapped inside.
+
+Every dialog ships a built-in **X** close button in the top-right corner —
+it is the one dismiss control; you never add a Cancel button.
+
+```tsx
+import { Button, Dialog } from "@valux/ui";
+
+<Dialog>
+  <Dialog.Trigger asChild>
+    <Button color="primary">Edit profile</Button>
+  </Dialog.Trigger>
+  <Dialog.Content size="sm">
+    <Dialog.Header>
+      <Dialog.Icon tone="primary"><PencilIcon /></Dialog.Icon>
+      <Dialog.Title>Edit profile</Dialog.Title>
+      <Dialog.Description>Update your visible name.</Dialog.Description>
+    </Dialog.Header>
+    <Dialog.Body>
+      <input aria-label="Name" />
+    </Dialog.Body>
+    <Dialog.Footer>
+      <Dialog.Close asChild>
+        <Button color="primary">Save</Button>
+      </Dialog.Close>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog>
+```
+
+## Parts
+
+- **`Dialog`** — root. `open` / `defaultOpen` / `onOpenChange`.
+- **`Dialog.Trigger`** — native button or `asChild`; same reveal/ghost
+  choreography contract as the Menu trigger.
+- **`Dialog.Content`** — the panel:
+  - `placement`: `"trigger"` (default — anchored next to its trigger,
+    collision-aware) or `"center"` (classic centered modal; the morph still
+    travels from the trigger).
+  - `size`: definite widths — `"sm"` (24rem) · `"md"` (36rem, default) ·
+    `"lg"` (48rem) · `"full"` (the whole viewport; opens with no overshoot
+    so content never scales past its final size).
+  - `surface`: `"auto"` follows the theme; `"trigger"` adopts the trigger's
+    solid colors.
+  - `dismissable`: `false` ignores Esc and outside clicks (explicit close
+    only).
+  - `alert`: announce as `role="alertdialog"` (destructive/urgent confirms;
+    pair with `dismissable={false}`).
+  - `initialFocus`: ref to the element focused on open (default: first
+    tabbable).
+  - `closeLabel`: accessible label for the built-in X (default `"Close"`).
+- **`Dialog.Header` / `Dialog.Body` / `Dialog.Footer`** — structural parts.
+  With a `Body`, only it scrolls: the header, the X, and the footer stay
+  pinned. The footer right-aligns actions and stacks them full-width on
+  narrow screens (primary on top).
+- **`Dialog.Icon`** — tinted icon badge above the title. Bring any svg;
+  `tone`: `"primary" | "danger" | "success" | "warning" | "info" |
+  "neutral"`. Decorative (`aria-hidden`).
+- **`Dialog.Title` / `Dialog.Description`** — styled, fully customizable;
+  they wire `aria-labelledby` / `aria-describedby` automatically (a dev
+  warning fires if the dialog ends up with no accessible name).
+- **`Dialog.Close`** — closes from inside (native button or `asChild`) for
+  confirm actions like "Save".
+
+## Behavior
+
+- Modal: focus trap + focus return to trigger, iOS-proof scroll lock
+  (pinned body), inert background, scrim (tint + blur on desktop; tint only
+  on touch devices, like native platforms).
+- Dialogs stack: a dialog can open another dialog (or a menu). Esc and
+  outside clicks only ever dismiss the TOPMOST layer.
+- No trigger? A controlled `<Dialog open>` without a `Dialog.Trigger`
+  renders centered with a quick scale-fade in and out instead of the morph.
+- Pull-to-close gesture (same as Menu): the gesture scrubs the return morph;
+  short of the commit point it rewinds, past it the close completes
+  immediately. Trackpad inertia is swallowed after the commit.
+- Reduced motion swaps every morph for an instant crossfade.
+
+---
+
+# Sheet
+
+The bottom sheet. Unlike the Dialog it does **not** morph from its trigger:
+the panel slides up from the bottom edge (and slides — or is dragged — back
+down). Full width, safe-area aware, with the same glass material, scrim, and
+built-in X as the Dialog.
+
+```tsx
+import { Button, Sheet } from "@valux/ui";
+
+<Sheet>
+  <Sheet.Trigger asChild>
+    <Button variant="ghost">Quick settings</Button>
+  </Sheet.Trigger>
+  <Sheet.Content expandable>
+    <Sheet.Header>
+      <Sheet.Title>Quick settings</Sheet.Title>
+      <Sheet.Description>Preferences for this notebook.</Sheet.Description>
+    </Sheet.Header>
+    <Sheet.Body>{/* form controls */}</Sheet.Body>
+    <Sheet.Footer>
+      <Sheet.Close asChild><Button color="primary">Done</Button></Sheet.Close>
+    </Sheet.Footer>
+  </Sheet.Content>
+</Sheet>
+```
+
+## Parts
+
+- **`Sheet`** — root. `open` / `defaultOpen` / `onOpenChange`.
+- **`Sheet.Trigger`** — native button or `asChild`. The trigger stays put
+  (no morph choreography).
+- **`Sheet.Content`**:
+  - `height`: `"auto"` (hugs content, up to `85dvh`) · `"half"` (50dvh) ·
+    `"full"` (almost the whole viewport). Content scrolls internally past
+    the detent.
+  - `expandable`: lets users pull the sheet UP — its height follows the
+    gesture continuously, and on release the midpoint decides: past 50% of
+    the way it completes the expansion, short of it it springs back.
+    Pulling down collapses first; a further pull dismisses.
+  - `dismissable`, `closeLabel`: as in the Dialog.
+- **`Sheet.Header` / `Sheet.Body` / `Sheet.Footer`** — same structural
+  contract as the Dialog (pinned chrome, one scroll region with the
+  progressive top fog, stacked mobile actions).
+- **`Sheet.Title` / `Sheet.Description`** — automatic aria wiring, same as
+  the Dialog parts. **`Sheet.Close`** closes from inside.
+
+## Behavior
+
+- FLOATING: the sheet rises from the bottom but stays detached from the
+  screen edges — an outer gutter on all sides (safe-area aware) with the
+  full panel radius on every corner.
+
+- Modal: focus trap and return, iOS-proof scroll lock, inert background,
+  scrim. Participates in the same layer stack as dialogs and menus (Esc and
+  outside clicks dismiss only the topmost layer).
+- Pull-to-dismiss: drag down (touch/mouse) or two-finger swipe (trackpad,
+  inside or outside). The sheet follows the gesture; releasing past the
+  threshold — or flicking — plays a WAAPI exit from the exact release point
+  (panel slide + scrim fade from its dragged dimness). Releasing early
+  springs back.
+- Glass is OFF while the sheet slides and fades in at the settle (mobile
+  GPUs can't afford a moving backdrop blur).
+- Reduced motion swaps the slides for instant transitions.
+
+---
+
+# Drawer
+
+The Sheet's sibling for the SIDES: a floating full-height card that
+slides in from the left or right edge — navigation, carts, filter rails.
+Like the Sheet, it stays DETACHED from the screen: an outer gutter on
+every side (safe-area aware) with the full panel radius on all corners.
+
+```tsx
+import { Button, Drawer } from "@valux/ui";
+
+<Drawer>
+  <Drawer.Trigger asChild>
+    <Button>Cart</Button>
+  </Drawer.Trigger>
+  <Drawer.Content side="right" size="md">
+    <Drawer.Header>
+      <Drawer.Title>Cart</Drawer.Title>
+      <Drawer.Description>2 items ready.</Drawer.Description>
+    </Drawer.Header>
+    <Drawer.Body>{/* long content scrolls here */}</Drawer.Body>
+    <Drawer.Footer>
+      <Drawer.Close asChild>
+        <Button color="primary">Checkout</Button>
+      </Drawer.Close>
+    </Drawer.Footer>
+  </Drawer.Content>
+</Drawer>
+```
+
+## API
+
+- **`Drawer`** — root: `open` / `defaultOpen` / `onOpenChange`.
+- **`Drawer.Trigger`** — native button or `asChild`.
+- **`Drawer.Content`** — `side` (`"left" | "right"`, default right),
+  `size` (`"sm"` 18rem · `"md"` 22rem · `"lg"` 28rem, clamped to the
+  viewport minus gutters), `dismissable`, `closeLabel` for the built-in
+  X (the one dismiss control — never add a Cancel button).
+- **`Drawer.Header` / `Body` / `Footer`** — pinned chrome, one scroll
+  region with the family's top fog; the footer stacks on narrow screens.
+- **`Drawer.Title` / `Drawer.Description`** — wire the dialog's
+  accessible name/description automatically.
+- **`Drawer.Close`** — closes from inside (`asChild` supported).
+
+## Behavior
+
+- Modal like the Sheet: scrim, iOS-proof scroll lock, inert background,
+  focus trap and focus return; Esc and outside click dismiss the topmost
+  layer only.
+- Slides in from its edge with the glass off while moving (mobile frame
+  rates), floating gutters included in the travel.
+- PULL sideways to dismiss: drag the panel toward its edge (touch) or
+  two-finger horizontal swipe (trackpad). Short of a third of its width
+  it springs back; past it — or with a flick — it commits. Vertical
+  scrolling inside always wins over the gesture.
+- Reduced motion swaps the slide for an instant appearance.
+
+---
+
+# Toast
+
+Liquid notifications: a title pill fused onto a description panel (one goo
+silhouette) that GENERATES itself — the pill morphs in, the panel stretches
+out of it, the text breathes last — and reabsorbs on exit.
+
+```tsx
+import { Toaster, toast } from "@valux/ui";
+
+// Mount ONCE (e.g. in your root layout):
+<Toaster position="top" />
+
+// Fire from anywhere (no hooks, no context):
+toast("Saved");
+toast({
+  title: "Everything went well!",
+  description: "Your changes are safe. Keep editing.",
+  tone: "success",
+});
+```
+
+## API
+
+- **`<Toaster />`** — the stack host. `position`: `"top"` (default,
+  centered) · `"top-left"` · `"top-right"` · `"bottom"` · `"bottom-left"` ·
+  `"bottom-right"`. Lateral positions anchor the pill (and the liquid
+  stretch) to that side. `maxVisible` (default `1`).
+- **`toast(options | string)`** → id. Options: `title`, `description?`
+  (omit it for a compact pill-only toast), `tone?`
+  (`"neutral" | "success" | "danger" | "warning" | "info"`), `duration?`
+  (ms, default 4000; `0` = sticky).
+- **`toast.dismiss(id?)`** — programmatic dismissal; with no id it clears
+  everything (stage + queue).
+- **`toast.promise(promise, { loading, success, error })`** — fires a
+  sticky pill with a spinner, then SETTLES it in place when the promise
+  resolves or rejects: the pill pulses while its icon and title crossfade,
+  and (if the settled message has a `description`) the panel stretches out
+  of it with the same liquid generation. `success` / `error` accept a
+  string, options, or a callback receiving the value / reason. Returns the
+  original promise untouched.
+
+## Queueing rules
+
+- Only `maxVisible` toasts are on stage; the rest wait in a FIFO queue and
+  enter ONE BY ONE as each visible toast expires or is dismissed.
+- Queued toasts' timers do not run until they are shown.
+- Re-firing an IDENTICAL toast (same title/description/tone) refreshes the
+  existing one's timer instead of queueing a duplicate.
+- While toasts wait, up to two of them stack behind the stage card as
+  COMPLETE cards (icon, title, description — real toasts, slightly
+  scaled and dimmed). They fade in after the stage card finishes forming,
+  and on promotion the waiting card simply SLIDES TO THE FRONT — same
+  element, no re-entrance — while the rest of the line steps up.
+
+## Behavior
+
+Researched against toast-UX best practice (aria-live patterns, Sonner):
+
+- Auto-dismiss pauses while hovered AND while the window is hidden or
+  unfocused — a toast never expires where nobody could read it. Click
+  dismisses; swipe horizontally to throw it away. `toast.dismiss()` with no
+  id clears everything.
+- `action: { label, onClick }` renders a tabbable button (e.g. "Undo");
+  focus is NEVER stolen by a toast (WCAG 4.1.3).
+- A persistent visually-hidden `aria-live` region mirrors each new toast —
+  screen readers reliably announce regions that pre-exist their content.
+- Tones color the icon dot and title from the theme (`role="alert"` for
+  danger/warning, `role="status"` otherwise).
+- INVERTED vs the theme for maximum contrast: dark chip on light themes,
+  light chip on dark — all derived from the provider's surface tokens (the
+  primary wash included). The silhouette carries a hairline rim + soft
+  elevation via drop-shadow (a border cannot follow a goo shape).
+- Reduced motion swaps all animations for instant transitions.
+
+---
+
+# Input & TextArea
+
+Text fields with a fixed label above, two fill variants, and CURATED
+types: each `type` wires the right mobile keyboard and behavior out of
+the box. Validation never tints the border — the tone lives in the
+status line's dot and text (and the caret).
+
+```tsx
+import { Input, TextArea } from "@valux/ui";
+
+<Input label="Email" type="email" hint="Work or personal." />
+<Input label="Password" type="password" />         {/* built-in eye toggle */}
+<Input label="Username" tone="danger" message="Already taken." />
+<TextArea label="Notes" maxLength={280} showCount />
+```
+
+## Types (`type` prop — same name as HTML, curated values)
+
+`"text" | "email" | "password" | "search" | "number" | "tel" | "url"`
+
+Each preset configures `inputMode`, `enterKeyHint`, `autoComplete`,
+capitalization/spellcheck, and quirks — all overridable by explicit props:
+
+- **email** — email keyboard, `autocomplete="email"`, no autocorrect.
+- **password** — built-in reveal (eye) toggle with `aria-pressed`; pass
+  your own `suffix` to replace it; `revealLabel` localizes it.
+- **search** — search keyboard with a Search enter key.
+- **number** — decimal pad on phones; native spinners replaced by styled
+  chevron steppers that honor `step`/`min`/`max` (localize with
+  `stepLabels`); ArrowUp/ArrowDown still work on the field.
+- **tel** — phone pad, `autocomplete="tel"`.
+- **url** — URL keyboard, no autocapitalize/autocorrect.
+
+Dates, files, and colors are future dedicated components, not types.
+
+## API
+
+- `label` — visible label above the field (always label your inputs; use
+  `aria-label` only when the design truly has no visible label).
+- `variant` — `"outline"` (default: subtle border, no fill) ·
+  `"soft"` (whisper of washed fill).
+- `size` — `"sm" | "md" | "lg"`; heights match the Button scale
+  (2 / 2.5 / 3rem) so forms align.
+- `hint` — help text under the field; `message` + `tone`
+  (`"danger" | "success" | "warning"`) replace it with a status line
+  carrying the toast-family dot. `tone="danger"` also sets
+  `aria-invalid`.
+- `prefix` / `suffix` — icons, static text, or buttons inside the field;
+  they are in-flow, so wide text prefixes (`https://`, `$`) never overlap
+  the value.
+- `maxLength` + `showCount` — live character counter.
+- Everything else passes through (`name`, `value`/`defaultValue`,
+  `required`, `readOnly`, `disabled`, `onChange`, …) — controlled and
+  uncontrolled both work, plain `<form>` included.
+- **`TextArea`** — same chrome; `autoGrow` (default) up to `maxRows`.
+
+## Behavior
+
+- Focus is ALWAYS the theme-primary halo (even on invalid fields) — never
+  the browser ring, never a tone-tinted border.
+- Label, hint, and message are wired via generated ids
+  (`aria-describedby`); status messages announce via `role="status"`.
+- Browser autofill is repainted to the theme (no WebKit yellow).
+- On touch devices the font floors at 16px so iOS never zooms the field.
+- Everything derives from provider tokens: dark mode and tinted surfaces
+  keep contrast with no extra props.
+- Validation: the curated types keep NATIVE constraint validation (a
+  `type="url"`/`"email"` field with `required` blocks form submit with
+  the browser's own check). For inline feedback, pair your validation
+  with `tone` + `message` — the kit never auto-judges while typing.
+
+---
+
+# Switch
+
+Native-feel toggle: a REAL checkbox (`role="switch"`) styled as a fully
+round pill track with an elongated WHITE chip thumb (soft corners,
+deliberately not a circle), so forms and keyboard work for free. While
+dragging, the thumb becomes a LIQUID LENS: it grows past the track as
+bright translucent glass and the fill color follows your finger;
+releasing past the midpoint commits.
+
+```tsx
+import { Switch } from "@valux/ui";
+
+<Switch label="Notifications" description="Push and email." defaultChecked />
+<Switch label="Dark mode" checked={dark} onChange={(e) => setDark(e.target.checked)} />
+```
+
+## API
+
+- `label` — visible label beside the control (clicking it toggles);
+  `description` adds a secondary line wired via `aria-describedby`.
+- `labelFirst` — settings-row layout: label on the left, control on the
+  right, space-between.
+- `size` — `"sm" | "md" | "lg"` track sizes.
+- Everything else passes through to the underlying checkbox: `checked` /
+  `defaultChecked`, `onChange` (a real change event), `name` (submits
+  `"on"` in native forms), `disabled`, `required`, …
+
+## Behavior
+
+- Checked track is the theme primary; unchecked is an on-surface wash.
+  The chip stays WHITE in every state and mode.
+- Press-and-hold stretches the chip toward the empty side (the iOS
+  squish). DRAGGING turns it into the glass lens — bigger than the
+  track, blurring what's behind — and release past the midpoint commits.
+  A plain tap just toggles.
+- Space toggles from the keyboard; focus shows the kit focus ring on the
+  track.
+- Reduced motion disables the transitions.
+
+---
+
+# Checkbox & Radio
+
+Native inputs styled to the kit — forms, keyboard, and screen readers
+work for free. The checkbox's checkmark DRAWS itself in; the radio's dot
+POPS with the house overshoot. Pressing either dips it like a key.
+
+```tsx
+import { Checkbox, Radio, RadioGroup } from "@valux/ui";
+
+<Checkbox label="Accept the terms" description="You can leave anytime." />
+<Checkbox label="Select all" indeterminate />
+
+<RadioGroup label="Plan" defaultValue="pro" onValueChange={setPlan}>
+  <Radio value="free" label="Free" description="To try things out." />
+  <Radio value="pro" label="Pro" />
+  <Radio value="team" label="Team" />
+</RadioGroup>
+```
+
+## Checkbox
+
+- `label` / `description` — clicking the label toggles; the description
+  wires via `aria-describedby`.
+- `indeterminate` — the mixed "select all over a partial selection"
+  state: shows a bar instead of the mark and reports mixed to assistive
+  tech. Clicking resolves it to checked.
+- Everything else passes through: `checked`/`defaultChecked`, `onChange`,
+  `name` (submits `"on"`), `disabled`, `required`, …
+- `size` — `"sm" | "md" | "lg"` (1 / 1.25 / 1.5rem boxes) on both
+  Checkbox and Radio.
+- The box is a soft-cornered square (radius ~35% — family geometry, like
+  the Switch chip), filled with the theme primary when on; the MARK uses
+  the surface color (white on light, dark on dark — Switch-chip
+  philosophy).
+
+## RadioGroup + Radio
+
+- `RadioGroup` — `label` (wired via `aria-labelledby`), `value` /
+  `defaultValue` / `onValueChange`, `name` (auto-generated when omitted),
+  `disabled` for the whole group.
+- `Radio` — `value` (required), `label`, `description`, per-item
+  `disabled`.
+- Arrow keys move the selection natively inside the group; the ring is a
+  true circle (radios ARE circles). Checked fills the OUTER circle with
+  the primary while the popping dot is the surface color — the inverted
+  look shared with the Switch chip and the Checkbox mark.
+
+## Behavior
+
+- Focus shows the kit ring on the box/ring; reduced motion disables the
+  draw/pop transitions.
+- Colors derive from tokens: dark mode and tinted surfaces need no extra
+  props.
+
+---
+
+# Select
+
+A single-value picker whose trigger looks like an Input field and whose
+panel MORPHS out of that field with the Menu choreography. Options are
+DATA (not free composition), so the trigger resolves the selected label
+while closed and the combobox filter is built in.
+
+```tsx
+import { Select } from "@valux/ui";
+
+<Select
+  options={[
+    { value: "mx", label: "México" },
+    { value: "us", label: "United States", description: "USD" },
+    { value: "br", label: "Brasil", disabled: true },
+  ]}
+  defaultValue="mx"
+  onValueChange={setCountry}
+  name="country"
+>
+  <Select.Trigger label="Country" placeholder="Pick one…" />
+  <Select.Content searchable />
+</Select>
+```
+
+## API
+
+- **`Select`** (root) — `options` (`{ value, label, description?,
+  disabled?, textValue? }[]`), `value` / `defaultValue` /
+  `onValueChange`, `name` (submits via hidden input), `disabled`.
+- **`Select.Trigger`** — the field: `label`, `placeholder`, `hint` /
+  `message` / `tone` (same status-line contract as Input), `variant`
+  (`outline`/`soft`) and `size` (`sm`/`md`/`lg`) on the Input scale. The
+  chevron rotates while open.
+- **`Select.Content`** — the panel: `side`/`align` (collision-aware,
+  same as Menu), `searchable` + `searchPlaceholder` + `emptyMessage`
+  for combobox mode (a filter field at the top of the panel).
+
+## Behavior
+
+- The WHOLE bordered field is the morph origin: the panel visibly grows
+  out of it and returns into it; the pull-to-close gesture scrubs the
+  return morph like every other kit surface.
+- Keyboard: ArrowDown/ArrowUp open from the trigger; inside, arrows +
+  Home/End move, printable characters type-ahead, Enter/Space select,
+  Esc/Tab/outside click close; focus returns to the trigger. Focus lands
+  on the selected option (or the filter when `searchable`).
+- The selected option shows the family checkmark and the primary color;
+  `aria-selected`, `role="listbox"`/`"option"`, and the combobox pattern
+  on the trigger are wired for assistive tech.
+- Reduced motion swaps the morph for an instant crossfade.
+- `textValue` covers filtering/type-ahead when `label` is rich JSX.
+
+---
+
+# Context menu
+
+The Menu summoned at a POINT: right-click on desktop, LONG-PRESS on
+touch (iOS never fires `contextmenu`; the native callout is suppressed).
+The panel morphs from an invisible anchor under the pointer, and
+everything inside IS the Menu — same items, keyboard, type-ahead,
+shortcuts, and pull-to-close gesture.
+
+```tsx
+import { ContextMenu } from "@valux/ui";
+
+<ContextMenu>
+  <ContextMenu.Trigger>
+    <NoteCard />
+  </ContextMenu.Trigger>
+  <ContextMenu.Content aria-label="Note actions">
+    <ContextMenu.Label>Nota</ContextMenu.Label>
+    <ContextMenu.Item shortcut="⌘R" onSelect={rename}>Rename</ContextMenu.Item>
+    <ContextMenu.Item onSelect={duplicate}>Duplicate</ContextMenu.Item>
+    <ContextMenu.Separator />
+    <ContextMenu.Item destructive onSelect={remove}>Delete</ContextMenu.Item>
+  </ContextMenu.Content>
+</ContextMenu>
+```
+
+## API
+
+- **`ContextMenu`** (root) — `onOpenChange?`.
+- **`ContextMenu.Trigger`** — wraps the pressable area (any content).
+  Desktop: `contextmenu` (the browser menu is prevented). Touch:
+  500ms long-press; moving >10px cancels it so scrolling wins.
+- **`ContextMenu.Content` / `Item` / `Label` / `Separator`** — the
+  Menu's own parts, re-exported: `onSelect`, `destructive`, `icon`,
+  functional `shortcut`s, disabled — everything applies. Give the
+  Content an `aria-label` (there is no labelled trigger).
+
+## Behavior
+
+- Opens AT the pointer: an invisible 24px anchor is placed under the
+  click/finger and the panel morphs out of it (and returns into it on
+  close) with the house choreography.
+- Esc, outside click/tap, Tab, and the pull gesture dismiss; arrows +
+  type-ahead navigate; focus moves into the menu and back out on close.
+- Reduced motion swaps the morph for an instant crossfade.
+
+---
+
+# View transitions (Hero)
+
+SwiftUI-style transitions for the web: elements marked as SHARED fly
+between pages when you navigate, and same-page state changes can morph
+instead of snapping. Built on the browser's View Transitions API with
+the kit's choreography. Firefox (no API yet) degrades to a plain
+navigation; reduced motion skips transitions entirely.
+
+Lives in its own entry — `@valux/ui/transitions` — because it
+requires the Next.js App Router (`next` is an OPTIONAL peer dependency;
+the main entry stays Next-free).
+
+```tsx
+import {
+  Hero,
+  TransitionLink,
+  ViewTransitions,
+  useViewTransition,
+} from "@valux/ui/transitions";
+```
+
+## Setup (once)
+
+Mount the watcher inside the layout whose routes will transition:
+
+```tsx
+// app/layout.tsx (or a section layout)
+<ViewTransitions />
+```
+
+## API
+
+- **`<ViewTransitions />`** — resolves the in-flight transition when the
+  new route commits. Mount once, like the Toaster.
+- **`<TransitionLink href transition? replace?>`** — an anchor that runs
+  the navigation inside a view transition. `transition` picks the page
+  preset (below). Meta/Ctrl-clicks open normally; `replace` uses
+  router.replace.
+- **`<Hero name>`** — marks a shared element (matched geometry): the
+  element with the same `name` on the other page is where it flies.
+  Names must be unique per page; use as many heroes as you want.
+- **`useViewTransition()`** — same-page state morphs:
+  `transition(() => setState(...))`.
+- **`runViewTransition(update, preset?)`** — the low-level engine both
+  build on, exported for advanced cases.
+
+## Presets
+
+| `transition=` | Choreography |
+| --- | --- |
+| *(default)* | Shared elements travel over a quiet root crossfade. |
+| `"expand"` | The App Store card-to-page recipe (Example 2). |
+| `"slide"` | Old page slides out left, new slides in from the right. |
+| `"fade"` | Plain crossfade, both directions. |
+| any custom name | Lands on `<html data-vx-transition="...">` — write your own CSS (Example 4). |
+
+---
+
+## Example 1 — list → detail (hero basics)
+
+The card, its icon, and its title fly into the detail header.
+
+```tsx
+// app/notes/page.tsx
+{notes.map((note) => (
+  <TransitionLink key={note.id} href={`/notes/${note.id}`}>
+    <Hero name={`card-${note.id}`} className="card">
+      <Hero name={`icon-${note.id}`} className="icon">{note.emoji}</Hero>
+      <Hero name={`title-${note.id}`}><h3>{note.title}</h3></Hero>
+    </Hero>
+  </TransitionLink>
+))}
+
+// app/notes/[id]/page.tsx — the SAME names mark the landing spots
+<Hero name={`card-${note.id}`} className="detail">
+  <Hero name={`icon-${note.id}`} className="icon-lg">{note.emoji}</Hero>
+  <Hero name={`title-${note.id}`}><h1>{note.title}</h1></Hero>
+</Hero>
+```
+
+Rule of thumb: hero the pieces whose GEOMETRY should morph
+independently (an icon growing, a title re-sizing). If a whole block
+should travel as one unit, use ONE hero around it — see Example 2.
+
+## Example 2 — the App Store expansion (`transition="expand"`)
+
+A photo card that becomes the page: the image stays continuous the
+whole flight, the outgoing feed sinks behind, and the description rises
+after the card lands.
+
+```tsx
+// Feed: ONE hero per card — art and overlay travel as a single piece.
+<TransitionLink href={`/apps/${app.id}`} transition="expand">
+  <Hero name={`app-${app.id}`} className="card">
+    <img src={app.image} alt="" />
+    <div className="overlay">
+      <p>{app.category}</p>
+      <h3>{app.title}</h3>
+    </div>
+  </Hero>
+</TransitionLink>
+
+// Detail: the same hero name on the header block…
+<Hero name={`app-${app.id}`} className="detail-hero">
+  <img src={app.image} alt="" />
+  <div className="overlay">
+    <p>{app.category}</p>
+    <h1>{app.title}</h1>
+  </div>
+</Hero>
+
+// …and the below-the-fold content named "vx-body" (the preset's
+// convention): it RISES once the card lands, drops fast on the way back.
+<Hero name="vx-body">
+  <article>{app.description}</article>
+</Hero>
+```
+
+Match the flying corner radius to your card:
+
+```css
+:root { --vx-vt-radius: 1.75rem; } /* default: the kit's panel radius */
+```
+
+A close button is just `<TransitionLink href="/apps"
+transition="expand">✕</TransitionLink>` — the whole thing plays in
+reverse.
+
+## Example 3 — same-page morphs
+
+```tsx
+const transition = useViewTransition();
+
+<button onClick={() => transition(() => setOrder(shuffled))}>
+  Shuffle
+</button>
+```
+
+Heroes glide to their new slots; anything unnamed crossfades. Works for
+tab switches, layout toggles, filters — any state change.
+
+## Example 4 — a custom preset
+
+```tsx
+<TransitionLink href="/gallery" transition="zoom">Gallery</TransitionLink>
+```
+
+```css
+html[data-vx-transition="zoom"]::view-transition-old(root) {
+  animation: my-zoom-out 0.3s ease both;
+}
+html[data-vx-transition="zoom"]::view-transition-new(root) {
+  animation: my-zoom-in 0.35s ease both;
+}
+```
+
+The attribute exists only for the transition's lifetime.
+
+---
+
+## Lessons the `expand` preset encodes (so you never relearn them)
+
+These came from frame-by-frame review; they apply to ANY custom preset:
+
+1. **Never crossfade two differently-scaled snapshots.** The default
+   old/new crossfade double-exposes ("ghosting") when the sides differ
+   in size. `expand` shows only the NEW snapshot while the box morphs.
+2. **Cover, don't stretch.** With different aspect ratios, the default
+   stretch reads as "a different card appeared". `object-fit: cover` on
+   the snapshots makes aspect changes CROP — more content is revealed,
+   nothing deforms.
+3. **Round the flying box, not the snapshot.** Radius baked into a
+   snapshot scales with it (corner artifacts mid-flight). Put it on
+   `::view-transition-image-pair(...)` so it stays constant.
+4. **Late, transparent below-the-fold content.** A rising block with
+   its own background reads as a floating slab; keep it transparent and
+   delay it until the main element has landed.
+5. **Give the outgoing page depth.** Dim + scale it slightly (sink)
+   instead of leaving it frozen behind the flight.
+
+## Notes & limits
+
+- Old views are snapshots: text doesn't reflow mid-flight, videos/GIFs
+  freeze, and the page is briefly non-interactive (~400ms). One
+  transition runs at a time.
+- `Hero` names must be unique per page — duplicates make the browser
+  skip those groups.
+- Roadmap: direction-aware back gestures, per-hero spring configs, and
+  a live-content FLIP engine for cases snapshots can't cover.
+
+---
+
+# Motion & gestures
+
+One motion signature runs through the kit. Understanding it explains what
+you see — and what the gestures do.
+
+## The morph (Menu, Dialog)
+
+The trigger visually becomes the panel. Open: anticipation dip → the body
+stretches into a blurred streak and travels → unfolds with a spring (a
+slight overshoot, except fullscreen dialogs, which land exactly at final
+size) → the glass (translucent surface + backdrop blur) fades in as part of
+the settle. Close: the reverse, with the trigger's content traveling inside
+the returning body as a "ghost" and the real trigger revealing in a
+crossfade exactly beneath the landing.
+
+Implementation notes that matter to consumers:
+
+- Everything is WAAPI keyframes; the body travels **opaque** (the settled
+  glass color composited over the page around the trigger) and with the
+  backdrop blur off — the glass develops only at the settle. This keeps
+  mobile GPUs at frame rate.
+- Color is part of the morph: the body interpolates trigger ↔ panel
+  background, so there is never a color snap — including `surface="trigger"`.
+- The landing radius is scale-compensated per axis, so the compressed body
+  renders exactly the trigger's rounding (a plain pill radius deforms under
+  non-uniform scale).
+- Presets: Menu 500ms open / 460ms close; Dialog 540/460. On touch devices
+  the engine automatically shortens durations (~12%) and lightens the streak
+  blur (~40%).
+- `prefers-reduced-motion` replaces every morph with an instant swap.
+
+## Pull-to-close (Menu, Dialog)
+
+Drag down with a finger (touch) or swipe down with two fingers (trackpad,
+inside or outside the panel). The gesture does not translate the panel — it
+**scrubs the return morph itself** through its first half.
+
+The logic, precisely:
+
+1. The gesture only begins when nothing under the pointer can still scroll
+   up. Inside a scrolled `Dialog.Body`, swiping down first scrolls the
+   content back to its top; only then does the same continued gesture start
+   closing. Outside the panel, it always begins immediately.
+2. While engaged, gesture distance maps to morph progress (260px ≈ half the
+   close animation). Scrolling is suppressed for the duration.
+3. Release/stop short of the commit point (45%) — or pull back up — and the
+   morph rewinds to fully open.
+4. Cross the commit point (or flick hard) and the rest of the close plays
+   immediately. Trailing trackpad inertia is swallowed so it cannot nudge
+   the page.
+
+## Sheet gestures
+
+The sheet's return IS a slide, so the panel follows the finger directly.
+Same scroll-chain rule as above; release past a third of its height (or
+flick) to dismiss, earlier to spring back. With `expandable`, upward pulls
+grow the sheet continuously and the **midpoint** decides on release; while
+expanded, pulling down collapses first, and a further pull dismisses.
+
+## Scroll fog
+
+`Dialog.Body` / `Sheet.Body` show a progressive blur strip at their top
+edge only once scrolled — at the very top there is nothing; scrolled
+content slides under the fog.
+
+## Point bloom (ContextMenu)
+
+Surfaces that bloom from a POINT (no trigger element) use a crisper
+preset — shorter flight, far less blur — and the opaque travel color so
+the body never reads as a gray see-through. On close there is nothing to
+reveal, so the CONTENT stays aboard (dimmed, lightly blurred) and
+visibly crushes into the point with the shrinking body. Morph presets
+are per-surface: Menu, Dialog, and the point bloom each carry their own
+personality.
+
+## Toast liquid (generation & queue)
+
+The toast SILHOUETTE generates itself: the title pill morphs in, the
+panel stretches out of it (goo-fused), text breathes last; exits reabsorb.
+Queued toasts stack behind as complete cards and PASS TO THE FRONT when
+promoted — the same element slides forward, no re-entrance.
+
+## Switch lens & physics
+
+Pressing stretches the chip toward the empty side (iOS squish). Dragging
+turns it into a liquid lens: it scales past the track as translucent
+glass (backdrop blur) while the fill color follows the finger; release
+past the midpoint commits. Touch devices get a cheaper blur.
+
+## Selection family
+
+The checkbox's checkmark draws itself (stroke-dash), the indeterminate
+bar slides in, and the radio dot pops with the house overshoot. Pressing
+any of them dips the control like a key. All marks/dots use the SURFACE
+color over a primary fill — the inverted look shared with the Switch
+chip.

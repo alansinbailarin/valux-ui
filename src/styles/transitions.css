@@ -1,0 +1,150 @@
+/* View transitions — house choreography imposed on the browser's
+   ::view-transition pseudo-elements. Presets are keyed by
+   <html data-vx-transition="...">, set by TransitionLink/runViewTransition
+   for the transition's lifetime: NEW presets are pure CSS. */
+
+/* Default: heroes carry the story over a quiet root crossfade. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.3s;
+  animation-timing-function: cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+/* Every shared element travels with the house spring. */
+::view-transition-group(*) {
+  animation-duration: 0.45s;
+  animation-timing-function: cubic-bezier(0.3, 1.05, 0.4, 1);
+}
+
+::view-transition-image-pair(*) {
+  animation-timing-function: cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+/* ===== Preset: slide (forward navigation feel) ===== */
+html[data-vx-transition="slide"]::view-transition-old(root) {
+  animation: vx-vt-slide-out 0.32s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+html[data-vx-transition="slide"]::view-transition-new(root) {
+  animation: vx-vt-slide-in 0.36s cubic-bezier(0.3, 1, 0.4, 1) both;
+}
+
+@keyframes vx-vt-slide-out {
+  to {
+    opacity: 0;
+    transform: translateX(-10%);
+  }
+}
+
+@keyframes vx-vt-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12%);
+  }
+}
+
+/* ===== Preset: fade (plain, both directions) ===== */
+html[data-vx-transition="fade"]::view-transition-old(root) {
+  animation: vx-vt-fade-out 0.24s ease both;
+}
+
+html[data-vx-transition="fade"]::view-transition-new(root) {
+  animation: vx-vt-fade-in 0.28s ease both;
+}
+
+@keyframes vx-vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes vx-vt-fade-in {
+  from { opacity: 0; }
+}
+
+/* ===== Preset: expand — the App Store card-to-page recipe =====
+   Hard-won rules, shipped so nobody rediscovers them:
+   1. Only the NEW snapshot shows while geometry morphs (crossfading two
+      scales reads as ghosting).
+   2. Snapshots COVER the traveling box — aspect-ratio differences CROP,
+      revealing more content; they never stretch into "a different card".
+   3. The radius rides the FLYING BOX itself, constant at every size
+      (override --vx-vt-radius to match your card).
+   Convention: name the detail's below-the-fold block "vx-body" and it
+   rises AFTER the card lands (and drops fast on the way back). */
+html[data-vx-transition="expand"]::view-transition-old(*) {
+  animation: none;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-vx-transition="expand"]::view-transition-new(*) {
+  animation: none;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+html[data-vx-transition="expand"]::view-transition-image-pair(*) {
+  border-radius: var(--vx-vt-radius, calc(var(--vx-radius-control, 1rem) * 1.75));
+  overflow: clip;
+}
+
+html[data-vx-transition="expand"]::view-transition-image-pair(root) {
+  border-radius: 0;
+}
+
+html[data-vx-transition="expand"]::view-transition-group(*) {
+  animation-duration: 0.5s;
+  animation-timing-function: cubic-bezier(0.32, 1, 0.36, 1);
+}
+
+/* The outgoing page SINKS under the growing card; the incoming base
+   fades in a beat later beneath it. */
+html[data-vx-transition="expand"]::view-transition-old(root) {
+  opacity: 1;
+  animation: vx-vt-sink 0.45s cubic-bezier(0.3, 0.7, 0.4, 1) both;
+}
+
+html[data-vx-transition="expand"]::view-transition-new(root) {
+  animation: vx-vt-fade-in 0.3s ease 0.12s both;
+}
+
+@keyframes vx-vt-sink {
+  to {
+    opacity: 0.3;
+    transform: scale(0.955);
+  }
+}
+
+html[data-vx-transition="expand"]::view-transition-new(vx-body) {
+  animation: vx-vt-rise 0.36s cubic-bezier(0.3, 1, 0.4, 1) 0.2s both;
+}
+
+html[data-vx-transition="expand"]::view-transition-old(vx-body) {
+  opacity: 1;
+  animation: vx-vt-drop 0.18s ease-in both;
+}
+
+@keyframes vx-vt-rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+}
+
+@keyframes vx-vt-drop {
+  to {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-image-pair(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

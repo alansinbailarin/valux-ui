@@ -1,0 +1,236 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   The rotating cylinder
+
+   One line of text, repeated N times, arranged around a horizontal axis and
+   spun by the scroll position. There is no JavaScript here: the rotation is
+   an ordinary CSS animation whose *timeline* is the hero's own scroll range,
+   so it runs off the main thread and stays exact under a trackpad fling, a
+   scrollbar drag, or a jump to an anchor — the three things a rAF scroll
+   handler gets wrong.
+
+   Everything tunable is a custom property, because this is meant to graduate
+   into the kit once it earns its keep: rows, turns and type size are the
+   whole API.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.hero {
+  /* Rows around the drum. More rows = a tighter, wider cylinder. */
+  --cyl-rows: 12;
+  /* Full revolutions across the pinned scroll. */
+  --cyl-turns: 1.5;
+  /* Full-bleed on purpose: here the type IS the object, so it is sized to
+     the viewport rather than to a heading scale. The svh term is the guard
+     for wide, short windows, where the drum would grow taller than the
+     screen and crop its own middle rows: past that point height decides. */
+  --cyl-size: min(12vw, 24svh);
+
+  /* A stage, not a page: near-black so the type reads as lit rather than
+     printed. Neutral chroma keeps it in the same family as the kit's ink
+     (#171717) instead of introducing a second grey. */
+  --hero-bg: oklch(0.14 0 0);
+  --hero-ink: oklch(0.97 0 0);
+  /* The flow's two tones. The ribbon peak is deliberately held well below
+     the ink: white type has to keep its contrast over the brightest thing
+     the background can do, and this runs behind the headline. */
+  --flow-void: oklch(0.14 0 0);
+  --flow-ribbon: oklch(0.72 0 0);
+
+  /* Where the drum begins and ends on screen, as distances from its own
+     axis. Declared here, not on the pseudo-element that first needed them:
+     both the contrast bed and the silhouette read these, and a custom
+     property set on ::after is invisible to everything else. At 0.84 leading
+     the radius is 1.57em, which perspective magnifies to 1.95em; the ±30°
+     rows land at 0.97em. */
+  --cyl-lit: calc(var(--cyl-size) * 1.15); /* clear through the front rows */
+  --cyl-edge: calc(var(--cyl-size) * 1.95); /* the silhouette, curving away */
+
+  position: relative;
+  /* The track length IS the animation's duration. */
+  height: 320svh;
+  /* The page surface, by TOKEN — not the browser canvas. Without this the
+     surround relied on color-scheme's canvas color agreeing with the kit's
+     surface, which is coincidence, not contract. */
+  background: var(--vx-color-surface-base);
+  /* A breath of page around the stage: the same rhythm as the mosaic's
+     margins, so hero card and wall read as one composition. */
+  padding-inline: clamp(1rem, 3vw, 2.25rem);
+  view-timeline-name: --hero;
+  view-timeline-axis: block;
+}
+
+/* The light stage: same sculpture, inverted lighting. Only an EXPLICIT
+   light choice flips it — under system-light the dark drum stays, as the
+   designed contrast band on an otherwise light page. The ribbon drops to
+   0.55 (darker than the ground) so the marble keeps reading as veins. */
+[data-vx-mode="light"] .hero {
+  --hero-bg: oklch(0.96 0 0);
+  --hero-ink: oklch(0.17 0 0);
+  --flow-void: oklch(0.96 0 0);
+  --flow-ribbon: oklch(0.55 0 0);
+}
+
+.hero__stage {
+  position: sticky;
+  /* The stage floats as a card: inset from the viewport's edges, big
+     radius, the page surface showing around it. The background moved here
+     from .hero for exactly this reason — the track behind is the page. */
+  top: clamp(1.5rem, 3.5vh, 2.75rem);
+  display: grid;
+  height: calc(100svh - 2 * clamp(1.5rem, 3.5vh, 2.75rem));
+  place-items: center;
+  overflow: hidden;
+  border-radius: clamp(1.5rem, 3vw, 2.75rem);
+  background: var(--hero-bg);
+  /* Proportional to the type, never absolute. The drum's radius is derived
+     from the font size, so a fixed rem perspective would magnify the front
+     row by 34% on a desktop and only 7% on a phone: the same CSS, a
+     different sculpture. Tying both to one unit keeps the foreshortening
+     identical at every width. */
+  perspective: calc(var(--cyl-size) * 8);
+}
+
+/* Contrast bed. The marble's brightest ribbons left white type at 2.90:1,
+   under the 3:1 that large text needs, so the band the headline occupies is
+   dampened before the type is drawn over it.
+   It has to sit BELOW the type: dimming both together (an overlay above the
+   headline) drops the ratio instead of raising it, because tint and ground
+   fall by the same factor. Under the type only the ground moves.
+   Vertical, and tied to the drum, so the flow stays at full strength across
+   the top and bottom of the screen, which is most of it. */
+.hero__bed {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--hero-bg), transparent 100%)
+      calc(50% - var(--cyl-edge) * 1.6),
+    color-mix(in srgb, var(--hero-bg) 50%, transparent)
+      calc(50% - var(--cyl-lit)),
+    color-mix(in srgb, var(--hero-bg) 50%, transparent)
+      calc(50% + var(--cyl-lit)),
+    color-mix(in srgb, var(--hero-bg), transparent 100%)
+      calc(50% + var(--cyl-edge) * 1.6)
+  );
+  pointer-events: none;
+}
+
+.hero__title {
+  /* Full width on purpose: every row is absolutely positioned, so none of
+     them feed the heading an intrinsic width. Left to shrink-wrap, the
+     heading collapses to zero, centres that nothing, and the nowrap text
+     spills out to the right of the middle. */
+  position: relative;
+  z-index: 2; /* above the contrast bed, below the silhouette */
+  width: 100%;
+  margin: 0;
+  color: var(--hero-ink);
+  font-size: var(--cyl-size);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  text-transform: uppercase;
+}
+
+.cyl {
+  /* Leading, and the drum's whole scale. Rows tile the cylinder's surface,
+     so the arc between two of them IS this height: it, not the row count,
+     is what opens or closes the gaps. Uppercase caps reach about 0.7em, so
+     going much below 0.78em starts to collide them. */
+  --cyl-lead: 0.84em;
+
+  /* Precomputed for 12 rows, then refined by trigonometry where the browser
+     has it. If tan() is missing the second declaration is dropped at parse
+     time and the literal survives — the cylinder still forms. */
+  --cyl-radius: 1.567em;
+  --cyl-radius: calc(var(--cyl-lead) / 2 / tan(180deg / var(--cyl-rows)));
+  --cyl-step: calc(360deg / var(--cyl-rows));
+
+  position: relative;
+  display: block;
+  width: 100%;
+  /* One row tall: every row is inset to this box and rotated out of it. */
+  height: var(--cyl-lead);
+  transform-style: preserve-3d;
+  animation: cyl-spin linear both;
+  animation-timeline: --hero;
+  /* `contain` on a subject taller than the viewport spans exactly the
+     stretch where the sticky stage is pinned — first pixel of pin to last.
+     That is the whole point: the spin can't drift out of step with the pin
+     because they are measured from the same geometry. */
+  animation-range: contain 0% contain 100%;
+}
+
+.cyl__row {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform: rotateX(calc(var(--i) * var(--cyl-step)))
+    translateZ(var(--cyl-radius));
+  /* Rows on the far side face away; showing them would print the text
+     mirrored through the drum. */
+  backface-visibility: hidden;
+  white-space: nowrap;
+}
+
+@keyframes cyl-spin {
+  to {
+    transform: rotateX(calc(var(--cyl-turns) * -360deg));
+  }
+}
+
+/* The silhouette. A cylinder is not lit evenly: the surface curves away at
+   the top and bottom edges, so rows dim into the background there instead of
+   being cut off by the viewport. Painted over the stage rather than masked
+   onto the drum, because a mask on the 3D container would flatten it. */
+.hero__stage::after {
+  /* Distances from the drum's own axis, not percentages of the stage. Tied
+     to the frame instead, the fade lands nowhere near the cylinder on a tall
+     phone and the rows end in a hard cut. Painted over the stage rather than
+     masked onto the drum: a mask on the 3D container would flatten it. */
+  /* Never fully opaque. Rows reaching the silhouette are edge-on slivers, so
+     a 92% veil is already more than enough to retire them — and the 8% left
+     over is what lets the flow keep running behind and between the letters
+     instead of being walled off above and below the drum. */
+  --cyl-veil: color-mix(in srgb, var(--hero-bg) 92%, transparent);
+
+  position: absolute;
+  z-index: 3;
+  content: "";
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--cyl-veil) calc(50% - var(--cyl-edge)),
+    color-mix(in srgb, var(--hero-bg), transparent 100%)
+      calc(50% - var(--cyl-lit)),
+    color-mix(in srgb, var(--hero-bg), transparent 100%)
+      calc(50% + var(--cyl-lit)),
+    var(--cyl-veil) calc(50% + var(--cyl-edge))
+  );
+  pointer-events: none;
+}
+
+/* Reduced motion, and browsers without scroll-driven animations (Firefox at
+   the time of writing), land in the same place: the drum stands still with
+   its front row square to the reader, and the hero stops reserving scroll it
+   no longer needs. The content is never gated behind the animation. */
+@media (prefers-reduced-motion: reduce) {
+  .hero {
+    height: 100svh;
+  }
+
+  .cyl {
+    animation: none;
+  }
+}
+
+@supports not (animation-timeline: view()) {
+  .hero {
+    height: 100svh;
+  }
+
+  .cyl {
+    animation: none;
+  }
+}

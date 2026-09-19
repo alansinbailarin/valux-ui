@@ -1,0 +1,97 @@
+"use client";
+
+import {
+  Button,
+  Card,
+  Checkbox,
+  Input,
+  Menu,
+  Radio,
+  RadioGroup,
+  Select,
+  Switch,
+  TextArea,
+} from "@/src";
+
+import { BUTTON_SPECIMEN } from "./specimenButton";
+import { RADIO_SPECIMEN } from "./specimenRadio";
+import { INPUT_SPECIMEN } from "./specimenInput";
+import type { Specimen } from "./specimenTypes";
+
+export type { Specimen, SpecimenControl, SpecimenValues } from "./specimenTypes";
+
+/* One node serves both stations: inert inside the wall tile, live inside
+ * the expanded canvas. Field-like specimens carry their own width so they
+ * neither collapse in the tile nor sprawl across the canvas. */
+export const CONTROL_SPECIMENS: Specimen[] = [
+  BUTTON_SPECIMEN,
+  RADIO_SPECIMEN,
+  INPUT_SPECIMEN,
+
+  { id: "switch", label: "Switch", height: 180, node: <Switch label="Notifications" defaultChecked /> },
+  { id: "checkbox", label: "Checkbox", height: 180, node: <Checkbox label="Remember me" defaultChecked /> },
+  {
+    id: "textarea",
+    label: "TextArea",
+    height: 300,
+    node: (
+      <div style={{ width: "16rem" }}>
+        <TextArea label="Release note" placeholder="What changed?" rows={4} />
+      </div>
+    ),
+  },
+  {
+    id: "select",
+    label: "Select",
+    height: 230,
+    node: (
+      <div style={{ width: "15rem" }}>
+        <Select
+          options={[
+            { value: "mx", label: "México" },
+            { value: "us", label: "United States" },
+            { value: "jp", label: "Japan" },
+          ]}
+          defaultValue="mx"
+        >
+          <Select.Trigger label="Country" placeholder="Pick one…" />
+          <Select.Content />
+        </Select>
+      </div>
+    ),
+  },
+  {
+    id: "menu",
+    label: "Menu",
+    height: 180,
+    node: (
+      <Menu>
+        <Menu.Trigger asChild>
+          <Button variant="soft">Actions</Button>
+        </Menu.Trigger>
+        <Menu.Content>
+          <Menu.Item>Share</Menu.Item>
+          <Menu.Item>Duplicate</Menu.Item>
+          <Menu.Item>Rename</Menu.Item>
+        </Menu.Content>
+      </Menu>
+    ),
+  },
+  {
+    id: "card",
+    label: "Card",
+    height: 420,
+    node: (
+      <div style={{ width: "17rem" }}>
+        <Card variant="elevated">
+          <Card.Header>
+            <Card.Title>Hey Jude.pdf</Card.Title>
+            <Card.Subtitle>2.4 MB · yesterday</Card.Subtitle>
+          </Card.Header>
+          <Card.Body>Same surface ladder as every panel.</Card.Body>
+        </Card>
+      </div>
+    ),
+  },
+];
+

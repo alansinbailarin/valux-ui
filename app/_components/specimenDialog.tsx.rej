@@ -1,0 +1,13 @@
+@@ -91,12 +91,12 @@
+           >
+             <Dialog.Header>
+               <Dialog.Title>{v.alert ? "Delete project?" : "Edit profile"}</Dialog.Title>
+             </Dialog.Header>
+             <Dialog.Body>
+               <Dialog.Description>
+                 {v.alert ? "This action cannot be undone. This will permanently delete your project." : "Make changes to your profile here. Click save when you're done."}
+               </Dialog.Description>
+             </Dialog.Body>
+             <Dialog.Footer>
+               <Dialog.Close asChild>
+                 <Button variant="soft">Cancel</Button>
