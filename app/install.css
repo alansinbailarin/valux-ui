@@ -5,7 +5,7 @@
 }
 
 .install-header {
-  font-size: 1.5rem;
+  font-size: 1.125rem;
   font-weight: 600;
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
@@ -13,13 +13,16 @@
 }
 
 .install-desc {
-  font-size: 1rem;
+  font-size: 0.875rem;
   color: var(--vx-color-surface-dim);
   margin-bottom: 1.5rem;
 }
 
 .install-block {
-  background: var(--vx-color-scrim-lower);
+  background: light-dark(
+    color-mix(in srgb, var(--vx-color-on-surface) 5%, var(--vx-color-surface-base)),
+    color-mix(in srgb, var(--vx-color-on-surface) 8%, var(--vx-color-surface-base))
+  );
   border-radius: var(--vx-radius-md);
   padding: 1.25rem;
   margin-bottom: 2rem;
@@ -45,8 +48,10 @@
 
 .quick-start-orb {
   position: fixed;
-  left: clamp(1rem, 4vw, 2rem);
-  bottom: clamp(1rem, 4vw, 2rem);
+  right: calc(clamp(1rem, 4vw, 2rem) + 3rem);
+  bottom: calc(clamp(1rem, 4vw, 2rem) - 0.225rem);
+  width: 2.25rem !important;
+  height: 2.25rem !important;
   z-index: 1300;
   border-radius: 50%;
   box-shadow: 0 4px 20px rgb(0 0 0 / 15%);
