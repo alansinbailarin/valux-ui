@@ -7,7 +7,7 @@ export const CHECKBOX_SPECIMEN: Specimen = {
   label: "Checkbox",
   description: "Form control for multiple selections, supporting native indeterminate states and fluid checked animations",
   height: 230,
-  node: <Checkbox defaultChecked label="Remember me" />,
+  node: <Checkbox defaultChecked label="Checkbox" />,
   controls: [
     { kind: "options", prop: "size", options: ["sm", "md", "lg"], initial: "md" },
     { kind: "flag", prop: "disabled" },

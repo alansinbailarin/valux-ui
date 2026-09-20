@@ -4,7 +4,7 @@ import type { Specimen } from "./specimenTypes";
 
 const POPOVER_INNER = (
   <div style={{ padding: '1.25rem', width: '16rem' }}>
-    <h4 style={{ margin: '0 0 0.5rem 0' }}>Configuration</h4>
+    <h4 style={{ margin: '0 0 0.5rem 0' }}>Popover</h4>
     <p style={{ margin: '0 0 1rem 0', fontSize: '0.875rem', color: 'color-mix(in srgb, var(--vx-color-on-surface) 70%, transparent)' }}>
       Adjust the widget behavior here.
     </p>
@@ -25,7 +25,7 @@ export const POPOVER_SPECIMEN: Specimen = {
   node: (
     <Popover>
       <Popover.Trigger asChild>
-        <Button color="primary">Configuration</Button>
+        <Button color="primary">Popover</Button>
       </Popover.Trigger>
       <Popover.Content>
         {POPOVER_INNER}
@@ -43,7 +43,7 @@ export const POPOVER_SPECIMEN: Specimen = {
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '2rem 0' }}>
         <Popover>
           <Popover.Trigger asChild>
-            <Button color="primary">Configuration</Button>
+            <Button color="primary">Popover</Button>
           </Popover.Trigger>
           <Popover.Content 
             side={v.side as any}
@@ -71,11 +71,11 @@ export function Example() {
   return (
     <Popover>
       <Popover.Trigger asChild>
-        <Button color="primary">Configuration</Button>
+        <Button color="primary">Popover</Button>
       </Popover.Trigger>
       <Popover.Content${propsString}>
         <div style={{ padding: '1.25rem', width: '16rem' }}>
-          <h4>Configuration</h4>
+          <h4>Popover</h4>
           <p>Adjust the widget behavior here.</p>
           <Popover.Close asChild>
             <Button variant="soft">Close</Button>

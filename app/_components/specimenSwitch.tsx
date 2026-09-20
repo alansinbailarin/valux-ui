@@ -7,7 +7,7 @@ export const SWITCH_SPECIMEN: Specimen = {
   label: "Switch",
   description: "Tactile toggle switch for immediate boolean settings, featuring spring-based motion and clear visual feedback",
   height: 230,
-  node: <Switch defaultChecked label="Remember me" />,
+  node: <Switch defaultChecked label="Switch" />,
   controls: [
     { kind: "options", prop: "size", options: ["sm", "md", "lg"], initial: "md" },
     { kind: "flag", prop: "disabled" },

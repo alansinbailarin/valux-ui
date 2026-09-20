@@ -9,7 +9,7 @@ export const TOAST_SPECIMEN: Specimen = {
   height: 230,
   node: (
     <Button variant="soft" onClick={(e) => { e.stopPropagation(); toast("Hello there!"); }}>
-      Dispatch Toast
+Toast
     </Button>
   ),
   controls: [
@@ -40,7 +40,7 @@ export const TOAST_SPECIMEN: Specimen = {
             });
           }}
         >
-          Dispatch Toast
+Toast
         </Button>
       </div>
     );
@@ -79,7 +79,7 @@ export function App() {
           toast(${opts});
         }}
       >
-        Dispatch Toast
+Toast
       </Button>
     </>
   );

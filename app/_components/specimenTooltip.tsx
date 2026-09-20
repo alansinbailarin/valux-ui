@@ -11,7 +11,7 @@ export const TOOLTIP_SPECIMEN: Specimen = {
     <Tooltip>
       <Tooltip.Trigger asChild>
         <span style={{ cursor: "help", borderBottom: "1px dotted currentColor" }}>
-          Hover me
+          Tooltip
         </span>
       </Tooltip.Trigger>
       <Tooltip.Content>This is a tooltip</Tooltip.Content>
@@ -25,7 +25,7 @@ export const TOOLTIP_SPECIMEN: Specimen = {
     return (
       <Tooltip>
         <Tooltip.Trigger asChild>
-          <Button variant="soft">Hover me</Button>
+          <Button variant="soft">Tooltip</Button>
         </Tooltip.Trigger>
         <Tooltip.Content side={v.side as any} align={v.align as any}>
           Contextual info here
@@ -45,7 +45,7 @@ export function Example() {
   return (
     <Tooltip>
       <Tooltip.Trigger asChild>
-        <Button variant="soft">Hover me</Button>
+        <Button variant="soft">Tooltip</Button>
       </Tooltip.Trigger>
       <Tooltip.Content${propsString}>
         Contextual info here

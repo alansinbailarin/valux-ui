@@ -55,7 +55,7 @@ export const DRAWER_SPECIMEN: Specimen = {
   node: (
     <Drawer>
       <Drawer.Trigger asChild>
-        <Button color="primary">View Notifications</Button>
+        <Button color="primary">Drawer</Button>
       </Drawer.Trigger>
       <Drawer.Content size="sm">
         {DRAWER_INNER}
@@ -72,7 +72,7 @@ export const DRAWER_SPECIMEN: Specimen = {
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '2rem 0' }}>
         <Drawer>
           <Drawer.Trigger asChild>
-            <Button color="primary">View Notifications</Button>
+            <Button color="primary">Drawer</Button>
           </Drawer.Trigger>
           <Drawer.Content 
             side={v.side as "left" | "right"}
@@ -99,7 +99,7 @@ export function Example() {
   return (
     <Drawer>
       <Drawer.Trigger asChild>
-        <Button color="primary">View Notifications</Button>
+        <Button color="primary">Drawer</Button>
       </Drawer.Trigger>
       <Drawer.Content${propsString}>
         <Drawer.Header>

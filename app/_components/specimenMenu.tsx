@@ -11,7 +11,7 @@ export const MENU_SPECIMEN: Specimen = {
   node: (
     <Menu>
       <Menu.Trigger asChild>
-        <Button color="primary">Options</Button>
+        <Button color="primary">Menu</Button>
       </Menu.Trigger>
       <Menu.Content>
         <Menu.Label>Document</Menu.Label>
@@ -32,7 +32,7 @@ export const MENU_SPECIMEN: Specimen = {
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '2rem 0' }}>
         <Menu>
           <Menu.Trigger asChild>
-            <Button color="primary">Options</Button>
+            <Button color="primary">Menu</Button>
           </Menu.Trigger>
           <Menu.Content 
             side={v.side as any}
@@ -63,7 +63,7 @@ export function Example() {
   return (
     <Menu>
       <Menu.Trigger asChild>
-        <Button color="primary">Options</Button>
+        <Button color="primary">Menu</Button>
       </Menu.Trigger>
       <Menu.Content${propsString}>
         <Menu.Label>Document</Menu.Label>

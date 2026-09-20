@@ -42,27 +42,16 @@ export function SpecimenCard({ spec, children }: { spec: Specimen; children: Rea
   return (
     <>
       
+      
       <Card
         ref={cardRef}
         className={`mosaic__specimen ${expanded ? "mosaic__specimen--vacated" : ""}`}
         data-spec-active={active ? "" : undefined}
-        style={{ height: "15rem", cursor: expanded ? 'default' : 'pointer', position: 'relative', display: 'flex', flexDirection: 'column' }}
+        style={{ height: "15rem", cursor: expanded ? 'default' : 'pointer' }}
         onClick={expanded ? undefined : open}
       >
-        <div className="specimen-chip" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="specimen-chip">
           {children}
-        </div>
-        <div 
-          style={{ 
-            padding: "1rem 1.25rem",
-            fontSize: "0.875rem",
-            fontWeight: 500,
-            color: "var(--vx-color-surface-dim)",
-            borderTop: "1px solid color-mix(in srgb, var(--vx-color-on-surface) 6%, transparent)",
-            pointerEvents: "none"
-          }}
-        >
-          {spec.label}
         </div>
       </Card>
       

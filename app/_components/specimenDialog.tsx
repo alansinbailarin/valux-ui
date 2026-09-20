@@ -12,11 +12,11 @@ export const DIALOG_SPECIMEN: Specimen = {
   node: (
     <Dialog>
       <Dialog.Trigger asChild>
-        <Button color="primary">Edit profile</Button>
+        <Button color="primary">Dialog</Button>
       </Dialog.Trigger>
       <Dialog.Content size="sm">
         <Dialog.Header>
-          <Dialog.Title>Edit profile</Dialog.Title>
+          <Dialog.Title>Dialog</Dialog.Title>
         </Dialog.Header>
       </Dialog.Content>
     </Dialog>
@@ -85,7 +85,7 @@ export const DIALOG_SPECIMEN: Specimen = {
         <Dialog>
           <Dialog.Trigger asChild>
             <Button color={v.alert ? "danger" : "primary"}>
-              {v.alert ? "Delete project" : "Edit profile"}
+              {v.alert ? "Delete project" : "Dialog"}
             </Button>
           </Dialog.Trigger>
           <Dialog.Content 
@@ -96,7 +96,7 @@ export const DIALOG_SPECIMEN: Specimen = {
             dismissable={v.dismissable !== false}
           >
             <Dialog.Header>
-              <Dialog.Title>{v.alert ? "Delete project?" : "Edit profile"}</Dialog.Title>
+              <Dialog.Title>{v.alert ? "Delete project?" : "Dialog"}</Dialog.Title>
             </Dialog.Header>
             <Dialog.Body>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>

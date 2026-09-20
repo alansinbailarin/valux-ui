@@ -23,7 +23,7 @@ export const SELECT_SPECIMEN: Specimen = {
   node: (
     <div style={{ width: "100%" }}>
       <Select options={COUNTRIES} defaultValue="mx">
-        <Select.Trigger label="Country" />
+        <Select.Trigger label="Select" />
         <Select.Content />
       </Select>
     </div>
@@ -57,7 +57,7 @@ export const SELECT_SPECIMEN: Specimen = {
             variant={v.variant as "outline" | "soft"}
             size={v.size as "sm" | "md" | "lg"}
             tone={tone}
-            label="Country"
+            label="Select"
             placeholder="Choose a country"
             hint={v.withHint ? "Select your primary residence." : undefined}
             message={message}
@@ -80,7 +80,7 @@ export const SELECT_SPECIMEN: Specimen = {
     if (v.size && v.size !== "md") props.push(`size="${v.size}"`);
     if (v.tone && v.tone !== "neutral") props.push(`tone="${v.tone}"`);
     
-    props.push(`label="Country"`);
+    props.push(`label="Select"`);
     props.push(`placeholder="Choose a country"`);
     if (v.withHint) props.push(`hint="Select your primary residence."`);
     

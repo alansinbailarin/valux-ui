@@ -11,7 +11,7 @@ export const CONTEXT_MENU_SPECIMEN: Specimen = {
     <div style={{ width: "100%", display: "flex", justifyContent: "center" }}>
       <ContextMenu>
         <ContextMenu.Trigger className="specimen-pad" style={{ width: "100%", height: "10rem", background: "color-mix(in srgb, var(--vx-color-on-surface) 5%, transparent)", display: "grid", placeItems: "center" }}>
-          Right-click anywhere here
+          ContextMenu
         </ContextMenu.Trigger>
         <Menu.Content>
           <Menu.Item icon={<Pen size={18} strokeWidth={2} />}>Edit</Menu.Item>
@@ -31,7 +31,7 @@ export const CONTEXT_MENU_SPECIMEN: Specimen = {
       <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "2rem 0" }}>
         <ContextMenu>
           <ContextMenu.Trigger className="specimen-pad" style={{ width: "100%", height: "10rem", background: "color-mix(in srgb, var(--vx-color-on-surface) 5%, transparent)", display: "grid", placeItems: "center", border: "1px dashed color-mix(in srgb, var(--vx-color-on-surface) 20%, transparent)", borderRadius: "var(--vx-radius-container)" }}>
-            Right-click anywhere here
+            ContextMenu
           </ContextMenu.Trigger>
           <Menu.Content
             side={v.side as "auto"}
@@ -59,7 +59,7 @@ export function Example() {
   return (
     <ContextMenu>
       <ContextMenu.Trigger className="zone">
-        Right-click anywhere here
+        ContextMenu
       </ContextMenu.Trigger>
       <Menu.Content${propsString}>
         <Menu.Item icon={<Pen size={18} strokeWidth={2} />} shortcut="⌘E">Edit</Menu.Item>

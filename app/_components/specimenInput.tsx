@@ -6,7 +6,7 @@ import type { Specimen } from "./specimenTypes";
 export const INPUT_SPECIMEN: Specimen = {
   id: "input",
   label: "Input",
-  node: <Input label="Email address" placeholder="Enter your email" type="email" />,
+  node: <Input label="Input" placeholder="Type here..." type="email" />,
   description: "Robust text field with built-in validation states, character counting, and seamless prefix or suffix integration",
   height: 280,
   controls: [

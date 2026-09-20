@@ -8,7 +8,7 @@ const SampleIcon = <FaceSmileIcon />;
 export const BUTTON_SPECIMEN: Specimen = {
   id: "button",
   label: "Button",
-  node: <Button color="primary">Create project</Button>,
+  node: <Button color="primary">Button</Button>,
   description: "Universally accessible button with motion-rich ripples, clear states, and native support for loading indicators and icons",
   height: 230,
   controls: [

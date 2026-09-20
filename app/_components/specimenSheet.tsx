@@ -80,7 +80,7 @@ export const SHEET_SPECIMEN: Specimen = {
   node: (
     <Sheet>
       <Sheet.Trigger asChild>
-        <Button color="primary">Upgrade Plan</Button>
+        <Button color="primary">Sheet</Button>
       </Sheet.Trigger>
       <Sheet.Content height="half">
         {SHEET_INNER}
@@ -97,7 +97,7 @@ export const SHEET_SPECIMEN: Specimen = {
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%', padding: '2rem 0' }}>
         <Sheet>
           <Sheet.Trigger asChild>
-            <Button color="primary">Upgrade Plan</Button>
+            <Button color="primary">Sheet</Button>
           </Sheet.Trigger>
           <Sheet.Content 
             height={v.height as "auto" | "half" | "full"}
@@ -124,7 +124,7 @@ export function Example() {
   return (
     <Sheet>
       <Sheet.Trigger asChild>
-        <Button color="primary">Upgrade Plan</Button>
+        <Button color="primary">Sheet</Button>
       </Sheet.Trigger>
       <Sheet.Content${propsString}>
         <Sheet.Header>

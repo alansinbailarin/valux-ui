@@ -9,7 +9,7 @@ export const CARD_SPECIMEN: Specimen = {
   node: (
     <Card variant="outline" style={{ width: '14rem' }}>
       <Card.Header>
-        <Card.Title>Hey Jude.pdf</Card.Title>
+        <Card.Title>Card</Card.Title>
         <p style={{ margin: 0, fontSize: '0.875rem', color: 'color-mix(in srgb, var(--vx-color-on-surface) 60%, transparent)' }}>2.4 MB</p>
       </Card.Header>
     </Card>

@@ -8,7 +8,7 @@ export const RADIO_SPECIMEN: Specimen = {
   description: "Accessible radio group for single-choice selections with smooth indicator transitions and clear focus rings",
   height: 230,
   node: (
-    <RadioGroup defaultValue="pro" label="Plan">
+    <RadioGroup defaultValue="pro" label="RadioGroup">
       <Radio value="free" label="Free" />
       <Radio value="pro" label="Pro" />
       <Radio value="team" label="Team" />

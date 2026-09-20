@@ -9,7 +9,7 @@ export const TEXTAREA_SPECIMEN: Specimen = {
   height: 300,
   node: (
     <div style={{ width: "100%" }}>
-      <TextArea label="Release note" placeholder="What changed?" rows={4} />
+      <TextArea label="TextArea" placeholder="Type here..." rows={4} />
     </div>
   ),
   controls: [
